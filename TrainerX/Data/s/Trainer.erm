@@ -1405,13 +1405,9 @@ ZVSE2
 !!en;
 
 !?FU(OnCustomDialogEvent)&i^dlg_id^=(TRAINER_MAIN_DLG)/i^mouse_item^=124/i^mouse_action^=(MOUSE_LMB_RELEASED); [custom monsters]
-!!VR(lastMon:y):S(MON_LAST_WOG);
-!!SN:L^amethyst2_4.dll^/?(amet2:y);     [check if Amethyst2_4 is enabeld]
-
-!!if&(amet2)<>0;
-  !!UN:C5509220/4/?(lastMon);
-  !!VR(lastMon):-1;
-!!en;
+; Get the last monster ID
+; Warning: Need to be defined in every mod that has extended monster ID
+!!FU(GetMaxMonsterId):P?(lastMon:y);
 
 !!SN:T^trainer.titleCustMon^/?z2/^hero^/s^trainer_hero^;
 !!SN:T^trainer.legendCustMon^/?z3/^max^/(lastMon);
@@ -1652,12 +1648,10 @@ ZVSE2
 !!FU7780023:Pi^mouse_item^/1;
 
 !?FU(OnCustomDialogEvent)&i^dlg_id^=(TRAINER_MAIN_DLG)/i^mouse_item^=125/i^mouse_action^=(MOUSE_LMB_RELEASED); [custom artifacts]
-!!SN:L^emerald3_3.era^/?(emer3:y);
-!!SN:L^emerald_v202a.era^/?(emer2:y);
-
-!!VR(lastArt:y):S(ART_LAST_WOG);
-!!VR(lastArt)&(emer3)<>0:S(TRAINER_ART_LAST_TUM);
-!!VR(lastArt)&(emer2)<>0:S(TRAINER_ART_LAST_EMER2);
+; Get the last artifact ID
+; Warning: GetMaxArtifactId has to be defined in mods! It is not part of EEF
+!!FU(GetMaxArtifactId):P?(lastArt:y);
+!!VR(lastArt):F(ART_LAST_WOG)/1000;     [compatiblity settings]
 
 !!SN:T^trainer.titleCustArt^/?z2/^hero^/s^trainer_hero^;
 !!SN:T^trainer.legendCustArt^/?z3/^max^/(lastArt);
@@ -1671,18 +1665,7 @@ ZVSE2
 !!UN:C9597928/1/?(firstChar:y);
 !!VR(firstCharIsNum)&(firstChar)>=48/(firstChar)<=57:S(TRUE);
 
-!!if&(firstCharIsNum)/(art)>=(ART_FIRST)/(art)<=(lastArt)/(emer3)=0;
-  !!HEi^trainer_hero^:A4/(art);
-
-  !!FU(trainer_RefreshArts):P;          [refresh artifacts]
-  !!FU(trainer_ShowArtDesc):P(art);
-  !!FU(trainer_PlayArtSound):P;
-
-  !!FU:E;
-!!en;
-
-; Set internal max artifact ID when emerald 3 is enabled. Note: the internal allowing artifact ID will be greater than the ID showing in the dialogue.
-!!if&(firstCharIsNum)/(art)>=(ART_FIRST)/(art)<=(TRAINER_ART_LAST_TUM_EST)/(emer3)<>0; [WIP - Don't check the last art ID since there is no reliable way to get the real result]
+!!if&(firstCharIsNum)/(art)>=(ART_FIRST)/(art)<=(lastArt);
   !!HEi^trainer_hero^:A4/(art);
 
   !!FU(trainer_RefreshArts):P;          [refresh artifacts]
@@ -1708,32 +1691,6 @@ ZVSE2
   !!SN:T^trainer.noArt^/?z2;
   !!IF:M^%z2^;
 !!en;
-
-*?FU(trainer_GetMaxArtId);              [There is no reliable way to check the last art id of Third Upgrade Mod]
-*!FU:E;
-*#VA(emer:x) (lastArt:x);
-
-*!if&(emer)=0;
-  *!VR(lastArt):S(ART_LAST_WOG);
-*!en;
-
-*!if&(emer)<>0;
-
-*!VR(emerArtStart:y)&i^Typhon_Third_Upgrade_Mod_Active^=(FALSE):S(ART_LAST_WOG);
-*!VR(emerArtStart)&i^Typhon_Third_Upgrade_Mod_Active^:S(TRAINER_ART_LAST_TUM);
-
-  *!re i/(emerArtStart)/1000;
-    *!UN:Ai/3/?(type:y);
-
-    *!br&(type)=1;                      [1 - no class]
-  *!en;
-
-  *!if&i<=1000;
-    *!VR(lastArt):Si;
-  *!el;
-    *!VR(lastArt):S1000;
-  *!en;
-*!en;
 
 !?FU(trainer_RefreshArts);
 !!re i/1/11;
@@ -1779,7 +1736,7 @@ ZVSE2
 !!VRz1:S^Horse00.wav^;
 !!SN:Pz1;
 
-;Mana
+; Mana
 !?FU(OnCustomDialogEvent)&i^dlg_id^=(TRAINER_MAIN_DLG)/i^mouse_item^=33/i^mouse_action^=(MOUSE_LMB_RELEASED);
 !!SN:W^trainer_hero^/?y1;
 !!HEy1:B0/?z3;
