@@ -1,2 +1,2 @@
 # ERA Mods
- Mods for HoMM 3 ERA
+ Mods for HoMM 3 ERA Launcher Edition
