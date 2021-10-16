@@ -153,7 +153,7 @@ ZVSE2
 !?FU(trainer_MainDialog);
 !!VRy1:Si^trainer_hero^;                [set trainer hero number]
 !!HEy1:B0/?z1;                          [export name to z1]
-!!VRs^trainer_hero^:Sz1;                [set trainer hero string]
+!!VRs^trainer_heroName^:Sz1;                [set trainer hero string]
 !!HEy1:O?i^trainer_player^;             [set trainer player number]
 !!FU(trainer_GetPlayerStr):Pi^trainer_player^; [set trainer player string]
 
@@ -713,7 +713,7 @@ ZVSE2
 
 *!VR(choice:y):S1 Sd<<(ssLv);
 
-!!SN:T^trainer.titleSs^/?z2/^ss^/z1/^hero^/s^trainer_hero^;
+!!SN:T^trainer.titleSs^/?z2/^ss^/z1/^hero^/s^trainer_heroName^;
 !!SN:T^trainer.notLearned^/?z3;
 !!SN:T^trainer.basic^/?z4;
 !!SN:T^trainer.advanced^/?z5;
@@ -934,7 +934,7 @@ ZVSE2
 !!DL(TRAINER_MAIN_DLG):Ax16/4/0/1;
 
 !?FU(OnCustomDialogEvent)&i^dlg_id^=(TRAINER_MAIN_DLG)/i^mouse_item^=147/i^mouse_action^=(MOUSE_LMB_PRESSED); [set hero level by entering number]
-!!SN:T^trainer.titleHeroLv^/?z2/^hero^/s^trainer_hero^;
+!!SN:T^trainer.titleHeroLv^/?z2/^hero^/s^trainer_heroName^;
 !!SN:T^trainer.legendHeroLv^/?z3/^maxLeg^/(TRAINER_LEVEL_CAP_LEGIT)/^maxExt^/(TRAINER_LEVEL_CAP_EXTREME);
 !!IF:D30/2/3/^^;
 !!IF:E1/30;                             [1 = index of v, 30 = number of extended dialog]
@@ -1071,7 +1071,7 @@ ZVSE2
 
 !!VR(psCap:y):Si^trainer_psCap^;
 
-!!SN:T^trainer.titlePs^/?z4/^ps^/z2/^hero^/s^trainer_hero^;
+!!SN:T^trainer.titlePs^/?z4/^ps^/z2/^hero^/s^trainer_heroName^;
 !!SN:T^trainer.legendPs^/?z5/^ps^/z2/^min^/(psMin)/^max^/(psCap);
 !!IF:D30/4/5/^^;              [get primary skill value input]
 !!IF:E1/30;
@@ -1365,7 +1365,7 @@ ZVSE2
 !!UN&y3>-1:N3/z3/y3/1;
 
 !!if&y3>(NO_MON)/y3<>(MON_BALLISTA)/y3<>(MON_FIRST_AID_TENT)/y3<>(MON_AMMO_CART)/y3<>(MON_EMISSARY_OF_WAR)/y3<>(MON_EMISSARY_OF_PEACE)/y3<>(MON_EMISSARY_OF_MANA)/y3<>(MON_EMISSARY_OF_LORE);
-  !!SN:T^trainer.titleAddMon^/?z6/^mon^/z3/^hero^/s^trainer_hero^;
+  !!SN:T^trainer.titleAddMon^/?z6/^mon^/z3/^hero^/s^trainer_heroName^;
   !!SN:T^trainer.legendAddMon^/?z7;
   !!IF:D55/6/7/0/0/0/0/0;
   !!IF:E1/55;
@@ -1381,7 +1381,7 @@ ZVSE2
   !!DO7780018/0/6/1:Py1;                [refresh hero army]
 !!en;
 
-!!SN:T^trainer.addMonSpec^/?z8/^mon^/z3/^hero^/s^trainer_hero^;
+!!SN:T^trainer.addMonSpec^/?z8/^mon^/z3/^hero^/s^trainer_heroName^;
 
 !!if&y3>=(MON_BALLISTA)/y3<=(MON_AMMO_CART);
   !!IF:Q1/(PIC_TYPE_MONSTER)/y3/2^%z8^;
@@ -1409,7 +1409,7 @@ ZVSE2
 ; Warning: Need to be defined in every mod that has extended monster ID
 !!FU(GetMaxMonsterId):P?(lastMon:y);
 
-!!SN:T^trainer.titleCustMon^/?z2/^hero^/s^trainer_hero^;
+!!SN:T^trainer.titleCustMon^/?z2/^hero^/s^trainer_heroName^;
 !!SN:T^trainer.legendCustMon^/?z3/^max^/(lastMon);
 !!IF:D30/2/3/^^;
 !!IF:E1/30;                             [1 = index of v, 30 = number of extended dialog]
@@ -1448,7 +1448,7 @@ ZVSE2
 !#VA(mon:x);
 !!SN:H^monname^/(mon)/1/?z4;
 
-!!SN:T^trainer.titleCustMonQty^/?z2/^mon^/z4/^hero^/s^trainer_hero^;
+!!SN:T^trainer.titleCustMonQty^/?z2/^mon^/z4/^hero^/s^trainer_heroName^;
 !!SN:T^trainer.legendCustMonQty^/?z3;
 !!IF:D30/2/3/^^;
 !!IF:E1/30;                             [1 = index of v, 30 = number of extended dialog]
@@ -1653,7 +1653,7 @@ ZVSE2
 !!FU(GetMaxArtifactId):P?(lastArt:y);
 !!VR(lastArt):F(ART_LAST_WOG)/1000;     [compatiblity settings]
 
-!!SN:T^trainer.titleCustArt^/?z2/^hero^/s^trainer_hero^;
+!!SN:T^trainer.titleCustArt^/?z2/^hero^/s^trainer_heroName^;
 !!SN:T^trainer.legendCustArt^/?z3/^max^/(lastArt);
 !!IF:D30/2/3/^^;
 !!IF:E1/30;                             [1 = index of v, 30 = number of extended dialog]
@@ -2009,7 +2009,7 @@ ZVSE2
 
 !!if&(isRecruited)=(FALSE);
   !!CO(cmd):E1;
-  !!SN:T^trainer.cmdNew^/?z3/^hero^/s^trainer_hero^;
+  !!SN:T^trainer.cmdNew^/?z3/^hero^/s^trainer_heroName^;
   !!IF:M^%z3^;
 !!en;
 
@@ -2204,7 +2204,7 @@ ZVSE2
 !!FU(trainer_ShowCmdScreen):Pi^trainer_hero^/1/1/?y1; [show commander screen]
 
 !?FU(OnCustomDialogEvent)&i^dlg_id^=(TRAINER_CMD_DLG)/i^mouse_item^>=122/i^mouse_item^<=123/i^mouse_action^=(MOUSE_LMB_PRESSED);
-!!SN:T^trainer.titleCmdLv^/?z2/^hero^/s^trainer_hero^;
+!!SN:T^trainer.titleCmdLv^/?z2/^hero^/s^trainer_heroName^;
 !!SN:T^trainer.legendCmdLv^/?z3/^max^/(TRAINER_LEVEL_CAP_LEGIT);
 !!IF:D30/2/3/^^;
 !!IF:E1/30;                             [1 = index of v, 30 = number of extended dialog]
@@ -2288,7 +2288,7 @@ ZVSE2
   !!HE(hero):B2/?(class:y);
   !!VR(town:y):S(class) :2;
   !!VRw118:S(firstLevelMons[town]);
-  !!SN:T^trainer.henchNew^/?z3/^hero^/s^trainer_hero^;
+  !!SN:T^trainer.henchNew^/?z3/^hero^/s^trainer_heroName^;
   !!IF:Q1/(PIC_TYPE_MONSTER)/w118/1^%z3^;
 !!en;
 
