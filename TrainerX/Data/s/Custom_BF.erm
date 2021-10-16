@@ -4,7 +4,8 @@ ZVSE2
 ; Engine:   ERM 2.0+
 ; Requires: ERA 3.3+, Era Erm Framework
 
-; Select your battlefield, mod for Era 2.46 or higher
+; Select your battlefield
+
 
 !?FU(OnKeyPressed_Battle)&i^key^=(KEY_F2);
 !!SN:W^Change_terrain^/-1;              [reset]
