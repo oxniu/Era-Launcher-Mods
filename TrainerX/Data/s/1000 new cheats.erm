@@ -7,7 +7,23 @@ ZVSE2
 ; Cheats activated by F3 and F6
 
 
-; F3 Move hero, delete objects/events
+*****************************************************************
+**** Set Up the type of the object placed by Place Obastacle ****
+*****************************************************************
+
+!?FU(trainer_SetVariables);
+; ============== SETTINGS ==============
+!!VRi^trainer_obstacleType^:S(OBJ_GRASS_HILLS);
+!!VRi^trainer_obstacleSubtype^:S0;
+; ============ END SETTINGS ============
+
+!?FU(OnEveryDay)&i^timerOnce^;
+!!FU(trainer_SetVariables):P;
+
+******************************************************
+**** Press F3 tp move hero, delete objects/events ****
+******************************************************
+
 !?FU(OnKeyPressed_AdvMap)&i^key^=(KEY_F3)/999;
 !#VA(key:x) (preventDefault:x) (isDown:x);
 
@@ -145,7 +161,7 @@ ZVSE2
   !!FU&(obj)<>(OBJ_STUB)/(obj)<>(OBJ_ANCHOR_POINT):E;
 
   *!TR(x)/(y)/(z):T?(land:y)/?(landSub:y)/?(river:y)/?(riverSub:y)/?(road:y)/?(roadSub:y)/?(mirror:y)/?(accessability:y); [no need to differentiate water and land...]
-  !!UN:I(x)/(y)/(z)/(OBJ_GRASS_HILLS)/0;
+  !!UN:I(x)/(y)/(z)/i^trainer_obstacleType^/i^trainer_obstacleSubtype^;
   !!VR(sound):S^telptin.wav^;
   !!SN:P(sound);
 !!en;
@@ -405,8 +421,10 @@ ZVSE2
 Error in getting town structure address. 
 The game may fall at any time.^; 
 
-****************************************************************************************************
-; F6 additional cheats menu
+*********************************************
+**** Press F6 for additional cheats menu ****
+*********************************************
+
 !?FU(OnKeyPressed_AdvMap)&i^key^=(KEY_F6)/999;
 !#VA(key:x) (preventDefault:x) (isDown:x);
 
@@ -629,5 +647,3 @@ The game may fall at any time.^;
 !!UN:C(addWeekday)/2/(weekday);
 
 !!UN:R2;
-
-****************************************************************************************************
