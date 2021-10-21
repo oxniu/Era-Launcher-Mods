@@ -11,8 +11,4 @@ ZVSE2
 !#DC(TRAINER_LEVEL_CAP_EXTREME)    = 6424;
 
 !#DC(TRAINER_OBJ_OPT_NONE)         = 9; [last option of object scanner]
-
-!#DC(TRAINER_ART_LAST_TUM)         = 267;[updated to TUM 2.11.7]
-!#DC(TRAINER_ART_LAST_EMER2)       = 254;[last artifact ID for ERA+ and AAP]
-!#DC(TRAINER_ART_LAST_TUM_EST)     = 300;[estimated last art ID with emerald3_3, must be greater than (TRAINER_TUM_LAST_ART)]
 ; ========= END CONSTANTS =========

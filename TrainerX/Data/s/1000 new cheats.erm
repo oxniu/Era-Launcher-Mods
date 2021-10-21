@@ -33,14 +33,12 @@ ZVSE2
 
 !?FU(trainer_SetUpObjScanner);
 !!if&i^trainer_objScannerOn^;
-  !!SN:T^trainer.objOff^?(popupOff:z);
-  !!IF:L^%(popupOff)^;
+  !!IF:L^%T(trainer.objOff)^;
   !!SN:W^trainer_objScannerOn^/0;
 !!el;
   !!VR(sound:z):S^Military.wav^;
   !!SN:P(sound);
-  !!SN:T^trainer.objOn^?(popupOn:z);
-  !!IF:L^%(popupOn)^;
+  !!IF:L^%T(trainer.objOn)^;
   !!SN:W^trainer_objScannerOn^/1;
 !!en;
 
@@ -494,15 +492,13 @@ The game may fall at any time.^;
 
 !?FU(trainer_SetUpBuilderMode);
 !!if&i^trainer_builder_on^;
-  !!SN:T^trainer.addBuilderOff^/?(builderOff:z);
-  !!IF:L^%(builderOff)^;
+  !!IF:L^%T(trainer.addBuilderOff)^;
   !!VRi^trainer_builder_on^:S(FALSE);
   !!CD:D4 M55;
 !!el;
   !!VR(sound:z):S^Military.wav^;
   !!SN:P(sound);
-  !!SN:T^trainer.addBuilderOn^/?(builderOn:z);
-  !!IF:L^%(builderOn)^;
+  !!IF:L^%T(trainer.addBuilderOn)^;
   !!VRi^trainer_builder_on^:S(TRUE);
   !!CD:D(INT_MAX) M0;
 !!en;
@@ -523,14 +519,12 @@ The game may fall at any time.^;
 ; Show coordinates
 !?FU(trainer_SetUpCoordScanner);
 !!if&i^trainer_coord_on^;
-  !!SN:T^trainer.addCoordOff^/?(coordOff:z);
-  !!IF:L^%(coordOff)^;
+  !!IF:L^%T(trainer.addCoordOff)^;
   !!VRi^trainer_coord_on^:S(FALSE);
 !!el;
   !!VR(sound:z):S^Military.wav^;
   !!SN:P(sound);
-  !!SN:T^trainer.addCoordOn^/?(coordOn:z);
-  !!IF:L^%(coordOn)^;
+  !!IF:L^%T(trainer.addCoordOn)^;
   !!VRi^trainer_coord_on^:S(TRUE);
 !!en;
 

@@ -111,8 +111,7 @@ ZVSE2
   !!if&i<=(HERO_LAST_WOG);
     !!VRi^trainer_hero^:Si;
   !!el;
-    !!SN:T^trainer.wrongName^/?z3;
-    !!IF:M^%z3^;
+    !!IF:M^%T(trainer.wrongName)^;
     !!VR(isWrongName):S(TRUE);
   !!en;
 !!en;
@@ -132,8 +131,7 @@ ZVSE2
     !!VRi^trainer_hero^:Sv2;
 
   !!el&(isOSTelpt);
-    !!SN:T^trainer.objTelptNoHero^/?(telptNoHero:z);
-    !!IF:M^%(telptNoHero)^;
+    !!IF:M^%T(trainer.objTelptNoHero)^;
 
   !!el&(isOSTelpt)=(FALSE);
     !!re i/(HERO_FIRST)/(HERO_LAST_WOG);[if not on the map...in towns maybe? excluding OS teleporation - serious bugs if teleporting a hero from a town]
@@ -144,8 +142,7 @@ ZVSE2
     !!en;
 
     !!if&i>(HERO_LAST_WOG)/(isOSMain)=(FALSE); [pop up msg if no hero, excluding OS main second search]
-      !!SN:T^trainer.noHero^/?(noHero:z);
-      !!IF:M^%(noHero)^;
+      !!IF:M^%T(trainer.noHero)^;
     !!en;
   !!en;
 !!en;
@@ -153,7 +150,7 @@ ZVSE2
 !?FU(trainer_MainDialog);
 !!VRy1:Si^trainer_hero^;                [set trainer hero number]
 !!HEy1:B0/?z1;                          [export name to z1]
-!!VRs^trainer_heroName^:Sz1;                [set trainer hero string]
+!!VRs^trainer_heroName^:Sz1;            [set trainer hero string]
 !!HEy1:O?i^trainer_player^;             [set trainer player number]
 !!FU(trainer_GetPlayerStr):Pi^trainer_player^; [set trainer player string]
 
@@ -836,8 +833,7 @@ ZVSE2
 !!SN:W^trainer_player^/?y12;            [set current player]
 
 !!if&y12<0;
-  !!SN:T^trainer.resNeut^/?z1;
-  !!IF:M^%z1^;
+  !!IF:M^%T(trainer.resNeut)^;
   !!FU:E;
 !!en;
 
@@ -1440,8 +1436,7 @@ ZVSE2
 
   !!DO7780018/0/6/1:Pi^trainer_hero^;   [refresh hero army]
 !!el;
-  !!SN:T^trainer.noMon^/?z2;
-  !!IF:M^%z2^;
+  !!IF:M^%T(trainer.noMon)^;
 !!en;
 
 !?FU(trainer_addMonInputQty);
@@ -1688,8 +1683,7 @@ ZVSE2
   !!FU(trainer_ShowArtDesc):Pi;
   !!FU(trainer_PlayArtSound):P;
 !!el;
-  !!SN:T^trainer.noArt^/?z2;
-  !!IF:M^%z2^;
+  !!IF:M^%T(trainer.noArt)^;
 !!en;
 
 !?FU(trainer_RefreshArts);
@@ -1785,8 +1779,7 @@ ZVSE2
 !!UN:A53/9/z1; spyglass name is empty
 
 !!if&i^trainer_player^=(NO_PLAYER);
-  !!SN:T^trainer.revealNeut^/?z3;
-  !!IF:M^%z3^;
+  !!IF:M^%T(trainer.revealNeut)^;
   !!FU:E;
 !!en;
 
@@ -1815,8 +1808,7 @@ ZVSE2
 !!UN:P900/?(stackExpOn:y); check if stack exp enabled
 
 !!if&(stackExpOn)=(FALSE);
-  !!SN:T^trainer.rankOff^/?z2;
-  !!IF:M^%z2^;
+  !!IF:M^%T(trainer.rankOff)^;
   !!FU:E;
 !!en;
 
@@ -1825,8 +1817,7 @@ ZVSE2
 !!HE(hero):C0/(slot)/?(mon:y)/?(qty:y)/?(exp:y); y5 stack experience
 
 !!if&(mon)<=(NO_MON);
-  !!SN:T^trainer.rankNoArmy^/?z3;
-  !!IF:M^%z3^;
+  !!IF:M^%T(trainer.rankNoArmy)^;
   !!FU:E;
 !!en;
 
@@ -1988,8 +1979,7 @@ ZVSE2
 !!UN:P3/?(cmdOn:y);
 
 !!if&(cmdOn)=1;
-  !!SN:T^trainer.cmdOff^/?z1;
-  !!IF:M^%z1^;
+  !!IF:M^%T(trainer.cmdOff)^;
 
   !!FU:E;
 !!en;
@@ -2001,8 +1991,7 @@ ZVSE2
 
 !!if&(isDead);                          [new syntax works?]
   !!CO(cmd):D0;
-  !!SN:T^trainer.cmdRevived^/?z2;
-  !!IF:M^%z2^;
+  !!IF:M^%T(trainer.cmdRevived)^;
 !!en;
 
 !!CO(cmd):E?(isRecruited:y);            [recruit a commander if there is none]
@@ -2281,8 +2270,7 @@ ZVSE2
 
 !!if&w118>(NO_MON)/w119<>(TRUE);        [revive henchman if there was a one and perished]
   !!VRw119:S(TRUE);
-  !!SN:T^trainer.henchRevived^/?z2;
-  !!IF:M^%z2^;
+  !!IF:M^%T(trainer.henchRevived)^;
 !!el&w118<=(NO_MON);                    [give henchamn if there was none]
   !!VRw119:S(TRUE);
   !!HE(hero):B2/?(class:y);
