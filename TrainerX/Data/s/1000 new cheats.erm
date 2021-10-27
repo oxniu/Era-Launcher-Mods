@@ -13,8 +13,8 @@ ZVSE2
 
 !?FU(trainer_SetVariables);
 ; ============== SETTINGS ==============
-!!VRi^trainer_obstacleType^:S(OBJ_GRASS_HILLS);
-!!VRi^trainer_obstacleSubtype^:S0;
+!!VRi^trainer_obstacleType^:S(OBJ_GRASS_HILLS); [default: (OBJ_GRASS_HILLS)]
+!!VRi^trainer_obstacleSubtype^:S0;              [default: 0]
 ; ============ END SETTINGS ============
 
 !?FU(OnEveryDay)&i^timerOnce^;
@@ -96,7 +96,7 @@ ZVSE2
 !!VR(popup:z):S(objScanner) +(altStr);
 !!IF:L^%(popup)^;
 
-!?FU(OnAdventureMapRightMouseClick)&i^trainer_objScannerOn^/i^key_ctrl^=(FALSE)/999;
+!?FU(OnAdventureMapRightMouseClick)&i^trainer_objScannerOn^/i^key_ctrl^=(FALSE)/i^mouse_item^=37/999;
 !!CM:R0;
 
 !!CM:P?(x:y)/?(y:y)/?(z:y);
@@ -113,7 +113,7 @@ ZVSE2
 
 !!FU(trainer_ObjScannerOptions):P(x)/(y)/(z);
 
-!?FU(OnAdventureMapLeftMouseClick)&i^trainer_objScannerOn^/i^key_alt^/999;
+!?FU(OnAdventureMapLeftMouseClick)&i^trainer_objScannerOn^/i^key_alt^/i^mouse_item^=37/999;
 !!CM:R0;
 
 !!CM:P?(x:y)/?(y:y)/?(z:y);
