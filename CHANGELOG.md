@@ -2,7 +2,7 @@
 # Change Log
 All notable changes to Trainer and Enhanced Henchmen
 
-## [Unreleased] - yyyy-mm-dd Trainer
+## [Unreleased] - yyyy-mm-dd - Trainer
 
 ### Added
 - New feature: Press F6 on the battlefield to activate new cheats, including multicast and kill all creatures
@@ -20,7 +20,7 @@ All notable changes to Trainer and Enhanced Henchmen
 ## [2.33] - 2021-10-12
 [Changelog of Era Laucnher Edition 2.33](http://wforum.heroes35.net/showthread.php?tid=5235&pid=129486#pid129486)
 
-## [Unreleased] - yyyy-mm-dd Enhanced Henchmen
+## [Unreleased] - yyyy-mm-dd - Enhanced Henchmen
 
 ### Added
 
