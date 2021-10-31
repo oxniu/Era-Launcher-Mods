@@ -33,7 +33,7 @@
     "advanced": "Advanced",
     "expert": "Expert",
 
-    "resNeut":  "This hero belongs to neutral faction. Resources cannot be modified for neutral faction.",
+    "resNoPlayer":  "This hero belongs to no player. Modifying resources does not work.",
     "wood": "Wood",
     "mercury": "Mercury",
     "ore":  "Ore",
@@ -61,7 +61,7 @@
 
     "titleAddMon": "How many @mon@ do you want to give to @hero@?",
     "legendAddMon": "Enter a number of creatures to give.",
-    "addMonSpec":  "Add @mon@ to @hero@'s army?",
+    "WMOwned": "@hero@ has owned a @mon@.",
     "titleCustMon": "Give a stack of creatures to @hero@.",
     "legendCustMon":  "Enter a creature number (0..@max@) or a full creature name.",
     "noMon":  "That doesn't sound like any creature we know! Try another one?",
@@ -69,6 +69,10 @@
     "legendCustMonQty": "Enter a number of creatures to give.",
 
     "heroArt": "Pass the @art@ to @hero@?",
+    "spellBookOwned": "@hero@ has owned a @art@.",
+    "titleScroll": "Give @hero@ a free spell scroll.",
+    "legendScroll": "Enter a spell number (0..@max@) or a full spell name.",
+    "noScroll": "That doesn't sound like any spell we know! Try another one?",
     "titleCustArt": "Give @hero@ a free artifact.",
     "legendCustArt":  "Enter an artifact number (0..@max@) or a full artifact name.",
     "noArt":  "That doesn't sound like any artifact we know! Try another one?",
@@ -77,7 +81,7 @@
     "legendMov":  "Enter a number of bonus tiles (0 to empty or negative to decrease).",
     "titleMana":  "How much mana do you want to give to @hero@?",
     "legendMana": "Enter a number of bonus mana (0 to empty or negative to decrease).",
-    "revealNeut": "This hero belongs to neutral faction. Revealing the map does not work for neutral faction.",
+    "revealNoPlayer": "This hero belongs to no player. Revealing map does not work.",
     "reveal": "Reveal the map for the @colour@ player?",
 
     "titleRank":  "Change the rank of @mon@.",
@@ -128,7 +132,7 @@
     "mine": "the mine",
     "garrison":   "the garrision",
     "shipyard":   "the shipyard",
-    "objMovHero":  "Move heroes",
+    "objMovHero":  "Move any heroe",
     "objMovHeroAlt": "Move heroes (prioritise on current)",
     "objOwner":    "Change owners",
     "objOwnerAlt":  "Change owners (current: @owner@)",
@@ -148,7 +152,7 @@
     "none":  "None",
     "noOwnerHero":  "None (kill hero)",
 
-    "titleAdd": "Additional Cheats\n\nToggle features as you wish.",
+    "titleAdd": "Additional Cheats\n\nSelect a feature you would like to use.",
     "addCoordOn": "Show Coordinates {ON}",
     "addCoordOff":  "Show Coordinates {OFF}",
     "hintCoord": "@existingHint@  (Coordinate: @x@/@y@/@z@, type: @objType@, subtype: @objSubtype@)",
@@ -159,6 +163,10 @@
     "addDate":  "Change in-game Date",
     "titleDate":  "Change the date of the game.",
     "legendDate": "Enter with this format \"month/week/date\".",
+
+    "addCastOn": "Multicast {ON}",
+    "addCastOff": "Multicast {Off}",
+    "addWinBattle": "Burn 'em all!",
 
     "acm":  {
       "ss0":  "Pathfinding",
@@ -190,7 +198,7 @@
       "ss26":  "Resistance",
       "ss27":  "First Aid",
       "master": "{~green}Master{~}",
-      "grandMaster":  "{~red}Grand Master{~}"
+      "grandMaster":  "{~r}Grand Master{~}"
     }
   }
 }

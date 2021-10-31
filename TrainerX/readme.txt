@@ -2,7 +2,7 @@ TrainerX
 
 A modpack of cheat mods, including:
 New Cheats - Author: Archer30
-Trainer - Author: Valery
+Trainer - Author: Valery, Archer30
 Display Events - Author: Valery, Gamecreator
 Execute Erm Commands - Author: Hawaiing
 Select your Battlefield - Author: Valery, Archer30
@@ -18,6 +18,7 @@ Press X to execute erm commands.
 
 Hotkey for battlefiled:
 Press F2 to change the type of special terrains.
+Press F6 to use additional cheats.
 
 TrainerX can be loaded during the game. Press F12 to update your mod settings.
 (If you have any issue with some descriptions after pressing F12, save and load again)

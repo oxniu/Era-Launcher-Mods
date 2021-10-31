@@ -20,9 +20,9 @@ ZVSE2
 !?FU(OnEveryDay)&i^timerOnce^;
 !!FU(trainer_SetVariables):P;
 
-******************************************************
-**** Press F3 tp move hero, delete objects/events ****
-******************************************************
+********************************************************************
+**** Adv Map - Press F3 to move any hero, delete objects/events ****
+********************************************************************
 
 !?FU(OnKeyPressed_AdvMap)&i^key^=(KEY_F3)/999;
 !#VA(key:x) (preventDefault:x) (isDown:x);
@@ -221,7 +221,7 @@ ZVSE2
 !#VA(x:x) (y:x) (z:x) (obj:x);
 
 !!if&i^key_alt^;                    [if alt is pressed, move current hero]
-  !!OW:A-1/?(activeHero:y);
+  !!OW:A(CURRENT_PLAYER)/?(activeHero:y);
 
   !!if|(x)>0/(y)>0/(z)>0;               [don't teleport if clicked on outside of the map, sorry to 0/0/0]
     !!HE(activeHero)&(activeHero)>(NO_HERO):P(x)/(y)/(z);
@@ -345,7 +345,7 @@ ZVSE2
 
 !!CA(x)/(y)/(z):U?(townId:y) T?(townType:y);
 
-!!FU(trainer_canBuildingBuilt)|(townType)=(TOWN_CASTLE)/(townType)=(TOWN_NECROPOLIS)/(townType)=(TOWN_FORTRESS)/(townType)=(TOWN_CONFLUX):P(townId)/6/?(result:y);
+!!FU(trainer_checkBuildingEligibility)|(townType)=(TOWN_CASTLE)/(townType)=(TOWN_NECROPOLIS)/(townType)=(TOWN_FORTRESS)/(townType)=(TOWN_CONFLUX):P(townId)/6/?(result:y);
 
 !!re i/0/43;
   !!VR(flag:y):S(TRUE);
@@ -391,7 +391,7 @@ ZVSE2
 !!SN:P(sound);
 
 ; is it allowed in principle to build this building in the city?            [igrik]
-!?FU(trainer_canBuildingBuilt);
+!?FU(trainer_checkBuildingEligibility);
 ; x1 - town number on map (0...47)
 ; x2 - building id
 ; x3 - return: bool (0-no, 1-yes)
@@ -419,18 +419,18 @@ ZVSE2
 Error in getting town structure address. 
 The game may fall at any time.^; 
 
-*********************************************
-**** Press F6 for additional cheats menu ****
-*********************************************
+*******************************************************
+**** Adv Map - Press F6 for additional cheats menu ****
+*******************************************************
 
 !?FU(OnKeyPressed_AdvMap)&i^key^=(KEY_F6)/999;
 !#VA(key:x) (preventDefault:x) (isDown:x);
 
 !!VR(preventDefault):S(TRUE);
 
-!!FU(trainer_ShowAddCheatsDialog):P;
+!!FU(trainer_ShowAddCheats_advMap):P;
 
-!?FU(trainer_ShowAddCheatsDialog);
+!?FU(trainer_ShowAddCheats_advMap);
 ; set up option (artfact) names
 !!SN:T^trainer.addCoordOff^/?(coordOff:z) H^art^/(ART_BLACKSHARD_OF_THE_DEAD_KNIGHT)/0/(coordOff);
 !!SN:T^trainer.addCoordOn^/?(coordOn:z) H^art^/(ART_SPECULUM)/0/(coordOn);
@@ -438,6 +438,7 @@ The game may fall at any time.^;
 !!SN:T^trainer.addEventsOn^/?(eventsOn:z) H^art^/(ART_SPYGLASS)/0/(eventsOn);
 !!SN:T^trainer.addBuilderOff^/?(builderOff:z) H^art^/(ART_SPIRIT_OF_OPPRESSION)/0/(builderOff);
 !!SN:T^trainer.addBuilderOn^/?(builderOn:z) H^art^/(ART_BADGE_OF_COURAGE)/0/(builderOn);
+!!SN:T^trainer.addDate^/?(date:z) H^art^/(ART_HOURGLASS_OF_THE_EVIL_HOUR)/0/(date);
 !!SN:T^trainer.titleAdd^/?(titleAdd:z);
 
 ; set up option (artifact) icons
@@ -458,9 +459,6 @@ The game may fall at any time.^;
 !!el;
   !!VR(builderIcon):S(ART_SPIRIT_OF_OPPRESSION);
 !!en;
-
-!!SN:T^trainer.addDate^/?(date:z);
-!!SN:H^art^/(ART_HOURGLASS_OF_THE_EVIL_HOUR)/0/(date);
 
 ; show dialogue
 !!IF:N(PIC_TYPE_ART)/(coordIcon)/(PIC_TYPE_ART)/(eventsIcon)/(PIC_TYPE_ART)/(builderIcon)/(PIC_TYPE_ART)/(ART_HOURGLASS_OF_THE_EVIL_HOUR);
@@ -488,35 +486,9 @@ The game may fall at any time.^;
 !!en;
 
 ; re-open the dialog with updated pictures
-!!FU(trainer_ShowAddCheatsDialog)&(choice)<>-1:P;
+!!FU(trainer_ShowAddCheats_advMap)&(choice)<>-1:P;
 
-!?FU(trainer_SetUpBuilderMode);
-!!if&i^trainer_builder_on^;
-  !!IF:L^%T(trainer.addBuilderOff)^;
-  !!VRi^trainer_builder_on^:S(FALSE);
-  !!CD:D4 M55;
-!!el;
-  !!VR(sound:z):S^Military.wav^;
-  !!SN:P(sound);
-  !!IF:L^%T(trainer.addBuilderOn)^;
-  !!VRi^trainer_builder_on^:S(TRUE);
-  !!CD:D(INT_MAX) M0;
-!!en;
-
-!?FU(OnTownMouseClick)&i^trainer_builder_on^/i^mouse_item^>=0/i^mouse_item^<=43;
-!!FU(trainer_BuilderMode):P;
-
-!?FU(trainer_BuilderMode);
-!!CA(CURRENT_TOWN):R(FALSE);            [restore built status - since it works with mouse click trigger, it won't work for AI]
-!!UN:R4/(CURRENT_TOWN);
-!!FU&i^mouse_action^<>(MOUSE_RMB_PRESSED):E;
-
-!!CA(CURRENT_TOWN):H1/?(visitingHero:y) T?(townType:y);
-!!FU&(visitingHero)=(NO_HERO):E;
-
-!!CD:A(townType)/i^mouse_item^/1 E(townType)/i^mouse_item^/0;
-
-; Show coordinates
+** Show coordinates
 !?FU(trainer_SetUpCoordScanner);
 !!if&i^trainer_coord_on^;
   !!IF:L^%T(trainer.addCoordOff)^;
@@ -536,7 +508,40 @@ The game may fall at any time.^;
 !!SN:T^trainer.hintCoord^/?(hintCoord:z)/^x^/(x)/^y^/(y)^z^/(z)/^objType^/(objType)/^objSubtype^/(objSubtype)/^existingHint^/(existingHint);
 !!MM:M^%(hintCoord)^;
 
-; Change in-game date
+** Builder Mode
+!?FU(trainer_SetUpBuilderMode);
+!!if&i^trainer_builder_on^;
+  !!IF:L^%T(trainer.addBuilderOff)^;
+  !!VRi^trainer_builder_on^:S(FALSE);
+  !!CD:D4 M55;
+!!el;
+  !!VR(sound:z):S^Military.wav^;
+  !!SN:P(sound);
+  !!IF:L^%T(trainer.addBuilderOn)^;
+  !!VRi^trainer_builder_on^:S(TRUE);
+  !!CD:D(INT_MAX) M0;
+!!en;
+
+!?FU(OnAfterBuildTownBuilding)&1000;    [trigger for human player only]
+!!CA(CURRENT_TOWN):R(FALSE);
+
+!?FU(OnTownMouseClick)&i^trainer_builder_on^/i^mouse_item^>=0/i^mouse_item^<=43;
+!!UN:V?(verWoG:y)/?(verErm:y);
+
+!!if&(verErm)<=3901;                    [compatiblity - replaced with OnAfterBuildTownBuildings for ERA later than 3.9.1]
+  !!CA(CURRENT_TOWN):R(FALSE);          [restore built status - since it works with mouse click trigger, it won't work for AI]
+  !!UN:R4/(CURRENT_TOWN);
+!!en;
+
+!!FU(trainer_ReduceDemolishRequirements)&i^mouse_action^=(MOUSE_RMB_PRESSED):P;
+
+!?FU(trainer_ReduceDemolishRequirements);
+!!CA(CURRENT_TOWN):H1/?(visitingHero:y) T?(townType:y);
+!!FU&(visitingHero)=(NO_HERO):E;
+
+!!CD:A(townType)/i^mouse_item^/1 E(townType)/i^mouse_item^/0;
+
+** Change in-game date
 !?FU(trainer_ChangeIngameDate);
 !!SN:T^trainer.titleDate^/?z4 T^trainer.legendDate^/?z5;
 !!IF:D30/4/5/^^;
@@ -559,6 +564,7 @@ The game may fall at any time.^;
 !!FU(NewIntArray):P?i^current_%(amountOfNumberArrays)_array_ID^;
 !!VR(breakPoint:y):S(NULL);
 !!VR(isNeedBreakPoint:y):S(FALSE);
+
 !!re i/0/(strLength)/1/-1;
   !!SN:Ks^trainer_originalString^/i/?(checkSymbol:z);
   !!VR(isNeedBreakPoint):S(TRUE);
@@ -576,6 +582,7 @@ The game may fall at any time.^;
   !!if&(isNeedBreakPoint);
     !!SN:Mi^current_%(amountOfNumberArrays)_array_ID^/?(arrayLength:y);
     !!co&(arrayLength)=(NULL);
+
     !!VR(amountOfNumberArrays):+1;
     !!FU(NewIntArray):P?i^current_%(amountOfNumberArrays)_array_ID^;
   !!en;
@@ -641,3 +648,84 @@ The game may fall at any time.^;
 !!UN:C(addWeekday)/2/(weekday);
 
 !!UN:R2;
+
+***********************************************************
+**** Battlefield - Press F6 for additional cheats menu ****
+***********************************************************
+
+!?FU(OnKeyPressed_Battle)&i^key^=(KEY_F6)/i^battle_humanOnly^=(FALSE);
+!#VA(key:x) (preventDefault:x) (isDown:x);
+
+!!VR(preventDefault):S(TRUE);
+
+!!FU(trainer_ShowAddCheats_battle):P;
+
+!?FU(trainer_ShowAddCheats_battle);
+; set up option (artfact) names
+!!SN:T^trainer.addCastOff^/?(castOff:z) H^art^/(ART_ORB_OF_INHIBITION)/0/(castOff);
+!!SN:T^trainer.addCastOn^/?(castOn:z) H^art^/(ART_ORB_OF_VULNERABILITY)/0/(castOn);
+!!SN:T^trainer.addWinBattle^/?(winBattle:z) H^art^/(ART_ARMAGEDDONS_BLADE)/0/(winBattle);
+!!SN:T^trainer.titleAdd^/?(titleAdd:z);
+
+; set up option (artifact) icons
+!!if&i^trainer_cast_on^;
+  !!VR(castIcon:y):S(ART_ORB_OF_VULNERABILITY);
+!!el;
+  !!VR(castIcon):S(ART_ORB_OF_INHIBITION);
+!!en;
+
+; show dialogue
+!!IF:N(PIC_TYPE_ART)/(castIcon)/(PIC_TYPE_ART)/(ART_ARMAGEDDONS_BLADE);
+!!IF:N(MSG_TYPE_CHOOSE_PIC_OR_CANCEL)/^%(titleAdd)^/?(choice:y)/(TEXT_ALIGN_CENTER)/(DLG_NO_SELECTION);
+
+; execute accoridng to choices
+!!if&(choice)=0;
+  !!FU(trainer_SetUpMulticast):P;
+!!el&(choice)=1;
+  !!FU(trainer_WinThisBattle):P;
+!!en;
+
+; restore names of artifacts
+!!UN:A(ART_ORB_OF_INHIBITION)/9/0 A(ART_ORB_OF_VULNERABILITY)/9/0 A(ART_ARMAGEDDONS_BLADE)/9/0;
+
+; re-open the dialog with updated pictures
+!!FU(trainer_ShowAddCheats_battle)&(choice)=0:P; [if the choice was mutlicast]
+
+** Multicast
+!?FU(trainer_SetUpMulticast);
+!!if&i^trainer_cast_on^;
+  !!IF:L^%T(trainer.addCastOff)^;
+  !!VRi^trainer_cast_on^:S(FALSE);
+!!el;
+  !!VR(sound:z):S^Military.wav^;
+  !!SN:P(sound);
+  !!IF:L^%T(trainer.addCastOn)^;
+  !!VRi^trainer_cast_on^:S(TRUE);
+!!en;
+
+!?FU(OnAfterBattleAction)&i^trainer_cast_on^;
+!!BH(BATTLE_LEFT)&i^battle_human_0^:M0; [for human players only]
+!!BH(BATTLE_RIGHT)&i^battle_human_1^:M0;
+
+** Win this Battle
+!?FU(trainer_WinThisBattle);
+!!OW:C?(player:y)/?(interactPlayer:y);
+
+!!if&i^battle_owner_0^=(interactPlayer);
+  !!FU(trainer_KillAllUnits):P1;
+!!el;
+  !!FU(trainer_KillAllUnits):P0;
+!!en;
+
+!?FU(trainer_KillAllUnits);
+!#VA(side:x);
+
+!!VR(firstStack:y):S(side)*21;
+!!VR(lastStack:y):S(firstStack) +20;
+
+!!re i/(firstStack)/(lastStack);
+  !!BMi:T?(mon:y) N?(qty:y);
+  !!BMi&(mon)>(NO_MON)/(qty)>0:K2000000000; [overflow if (INT_MAX)]
+!!en;
+
+!!SN:D;

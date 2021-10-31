@@ -7,7 +7,7 @@ ZVSE2
 ; Select your battlefield
 
 
-!?FU(OnKeyPressed_Battle)&i^key^=(KEY_F2);
+!?FU(OnKeyPressed_Battle)&i^key^=(KEY_F2)/i^battle_humanOnly^=(FALSE);
 !!SN:W^Change_terrain^/-1;              [reset]
 !!DL448:N^custom_bf.txt^;
 !!DO4122144/2/10/1:P;                   [prepare items 2-10 cadres]
