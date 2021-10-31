@@ -1020,10 +1020,10 @@ ZVSE2
 !!VRz18&(pwr)=(psCap):S^{~green}%(pwr){~}^;
 !!VRz19&(knl)=(psCap):S^{~green}%(knl){~}^;
 
-!!VRz16|(atk)<0/(atk)>(psCap):S^{~r}%(atk){~}^; [invalid values]
-!!VRz17|(def)<0/(def)>(psCap):S^{~r}%(def){~}^;
-!!VRz18|(pwr)<1/(pwr)>(psCap):S^{~r}%(pwr){~}^;
-!!VRz19|(knl)<1/(knl)>(psCap):S^{~r}%(knl){~}^;
+!!VRz16|(atk)<0/(atk)>(psCap):S^{~red}%(atk){~}^; [invalid values]
+!!VRz17|(def)<0/(def)>(psCap):S^{~red}%(def){~}^;
+!!VRz18|(pwr)<1/(pwr)>(psCap):S^{~red}%(pwr){~}^;
+!!VRz19|(knl)<1/(knl)>(psCap):S^{~red}%(knl){~}^;
 
 !!DL(TRAINER_MAIN_DLG):A141/3/z16/1 A142/3/z17/1 A143/3/z18/1 A144/3/z19/1;
 
