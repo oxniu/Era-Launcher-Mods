@@ -14,7 +14,7 @@ All notable changes to Trainer and Enhanced Henchmen
 
 ### Fixed
 - Fixed playing sound when giving commander an artifact while the commander's slots are full
-- Fixed henchmen button shows when Henchmen is disabled
+- Fixed henchmen button showing when Henchmen is disabled
 - Fixed showing wrong number of the last artifact for TUM
 - Fixed wrong images of monsters and artifacts if mods with alternative graphics are loaded.
 
