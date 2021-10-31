@@ -21,6 +21,8 @@ All notable changes to Trainer
 [Changelog of Era Laucnher Edition 2.33](http://wforum.heroes35.net/showthread.php?tid=5235&pid=129486#pid129486)
 
 
+
+
 All notable changes to Enhanced Henchmen
 
 ## [Unreleased] - yyyy-mm-dd
