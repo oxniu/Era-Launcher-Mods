@@ -10,7 +10,8 @@ All notable changes to Trainer
 
 ### Fixed
 
-## [2.13.1] - 2021-10-11
+## [2.33] - 2021-10-12
+[Changelog of Era Laucnher Edition 2.33](http://wforum.heroes35.net/showthread.php?tid=5235&pid=129486#pid129486)
 
 
 All notable changes to Enhanced Henchmen
@@ -23,4 +24,5 @@ All notable changes to Enhanced Henchmen
 
 ### Fixed
 
-## [2.13.1] - 2021-10-11
+## [1.1.4] - 2021-10-12
+[Changelog of Era Laucnher Edition 2.33](http://wforum.heroes35.net/showthread.php?tid=5235&pid=129486#pid129486)
