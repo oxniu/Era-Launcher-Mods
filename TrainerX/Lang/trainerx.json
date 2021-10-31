@@ -198,7 +198,7 @@
       "ss26":  "Resistance",
       "ss27":  "First Aid",
       "master": "{~green}Master{~}",
-      "grandMaster":  "{~r}Grand Master{~}"
+      "grandMaster":  "{~red}Grand Master{~}"
     }
   }
 }
