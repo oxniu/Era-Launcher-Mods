@@ -5,7 +5,7 @@ All notable changes to Trainer and Enhanced Henchmen
 ## [Unreleased] - yyyy-mm-dd - Trainer
 
 ### Added
-- New feature: Press F6 on the battlefield to activate new cheats, including multicast and kill all creatures
+- New feature: Press F6 on the battlefield to activate new cheats, including Multicast and Win the Battle
 - New feature: Give Spell Book and Spell Scrolls to the hero.
 
 ### Changed
