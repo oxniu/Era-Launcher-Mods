@@ -132,7 +132,7 @@
     "mine": "the mine",
     "garrison":   "the garrision",
     "shipyard":   "the shipyard",
-    "objMovHero":  "Move any heroe",
+    "objMovHero":  "Move any hero",
     "objMovHeroAlt": "Move heroes (prioritise on current)",
     "objOwner":    "Change owners",
     "objOwnerAlt":  "Change owners (current: @owner@)",
