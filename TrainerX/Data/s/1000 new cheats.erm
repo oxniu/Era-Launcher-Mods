@@ -523,7 +523,8 @@ The game may fall at any time.^;
 !!en;
 
 !?FU(OnAfterBuildTownBuilding)&1000;    [trigger for human player only]
-!!CA(CURRENT_TOWN):R(FALSE);
+!#VA(townId:x);
+!!CA0/(townId):R(FALSE);
 
 !?FU(OnTownMouseClick)&i^trainer_builder_on^/i^mouse_item^>=0/i^mouse_item^<=43;
 !!UN:V?(verWoG:y)/?(verErm:y);
