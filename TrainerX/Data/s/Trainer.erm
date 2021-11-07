@@ -1207,6 +1207,7 @@ ZVSE2
 
 !?FU(trainer_RefreshMonTable);
 !#VA(page:x);
+!!DL(TRAINER_MAIN_DLG):A3/(DLG_CMD_SET_DEF_FRAME)/(page);
 
 !!re (item:y)/83/98;
   !!FU(trainer_GetMonOfTheTable):P(page)/(item)/?(mon:y);
