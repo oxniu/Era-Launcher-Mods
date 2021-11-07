@@ -57,18 +57,16 @@ ZVSE2
   !!SN:T^trainer.objMain^/?(altStr:z);
 !!el&(key)=(KEY_2);
   !!VRi^trainer_objChoice^:S1;
-  !!SN:T^trainer.objMovHeroAlt^/?(altStr);
+  !!SN:T^trainer.objMoveHeroAlt^/?(altStr);
 !!el&(key)=(KEY_3);
   !!VRi^trainer_objChoice^:S2;
-  !!SN&i^trainer_ownerChoice^=(PLAYER_RED):T^trainer.red^/?(owner:z);
-  !!SN&i^trainer_ownerChoice^=(PLAYER_BLUE):T^trainer.blue^/?(owner);
-  !!SN&i^trainer_ownerChoice^=(PLAYER_TAN):T^trainer.tan^/?(owner);
-  !!SN&i^trainer_ownerChoice^=(PLAYER_GREEN):T^trainer.green^/?(owner);
-  !!SN&i^trainer_ownerChoice^=(PLAYER_ORANGE):T^trainer.orange^/?(owner);
-  !!SN&i^trainer_ownerChoice^=(PLAYER_PURPLE):T^trainer.purple^/?(owner);
-  !!SN&i^trainer_ownerChoice^=(PLAYER_TEAL):T^trainer.teal^/?(owner);
-  !!SN&i^trainer_ownerChoice^=(PLAYER_PINK):T^trainer.pink^/?(owner);
-  !!SN&i^trainer_ownerChoice^=8:T^trainer.none^/?(owner);
+
+  !!if&i^trainer_ownerChoice^<=(PLAYER_LAST);
+    !!FU(trainer_GetTxtFileString):P^plcolors^/i^trainer_ownerChoice^/?(owner:z);
+  !!el&i^trainer_ownerChoice^=8;
+    !!SN:T^trainer.none^/?(owner);
+  !!en;
+  
   !!SN:T^trainer.objOwnerAlt^/?(altStr)/^owner^/(owner);
 !!el&(key)=(KEY_4);
   !!VRi^trainer_objChoice^:S3;
@@ -102,7 +100,7 @@ ZVSE2
 !!CM:P?(x:y)/?(y:y)/?(z:y);
 !!OB(x)/(y)/(z):T?(obj:y);
 
-!!SN:T^trainer.objTitle^/?z1 T^trainer.objMain^/?z2 T^trainer.objMovHero^/?z3;
+!!SN:T^trainer.objTitle^/?z1 T^trainer.objMain^/?z2 T^trainer.objMoveHero^/?z3;
 !!SN:T^trainer.objOwner^/?z4/^colour^/z11;
 !!SN:T^trainer.objDel^/?z5 T^trainer.objObstacle^/?z6 T^trainer.objEventOff^/?z7 T^trainer.objEventOn^/?z8;
 !!SN:T^trainer.objBuildAll^/?z9 T^trainer.objRemoveAll^/?z10 T^trainer.chgMind^/?z11;
@@ -113,7 +111,7 @@ ZVSE2
 
 !!FU(trainer_ObjScannerOptions):P(x)/(y)/(z);
 
-!?FU(OnAdventureMapLeftMouseClick)&i^trainer_objScannerOn^/i^key_alt^/i^mouse_item^=37/999;
+!?FU(OnAdventureMapLeftMouseClick)&i^trainer_objScannerOn^/i^key_alt^/i^mouse_action^=(MOUSE_LMB_PRESSED)/i^mouse_item^=37/999;
 !!CM:R0;
 
 !!CM:P?(x:y)/?(y:y)/?(z:y);
@@ -185,54 +183,61 @@ ZVSE2
 !!en;
 
 !?FU(trainer_ObjScannerMain);
+; This is for the main cheat (Trainer interface). Several objects are checked - trying to make it easier for player to find the hero they wish to find
 !#VA(x:x) (y:x) (z:x) (obj:x);
 
-!!if&(obj)=(OBJ_HERO);                [if clicked on a hero, enter trainer main interface with that hero]
+; If clicked on a hero, enter trainer main interface with that hero
+!!if&(obj)=(OBJ_HERO);                
   !!HE(x)/(y)/(z):N?i^trainer_hero^;
   !!FU(trainer_MainDialog):P;
-!!el|(obj)=(OBJ_TOWN)/(obj)=(OBJ_CREATURE_GENERATOR_1)/(obj)=(OBJ_CREATURE_GENERATOR_4)/(obj)=(OBJ_MINE)/(obj)=(OBJ_GARRISON)/(obj)=(OBJ_SHIPYARD); [if clicked on an object wtth owner, enter search for possible hero to enter trainer interface]
+; If clicked on an object wtth owner, enter search for possible hero to enter trainer interface
+!!el|(obj)=(OBJ_TOWN)/(obj)=(OBJ_CREATURE_GENERATOR_1)/(obj)=(OBJ_CREATURE_GENERATOR_4)/(obj)=(OBJ_MINE)/(obj)=(OBJ_MINE_2)/(obj)=(OBJ_LIGHTHOUSE)/(obj)=(OBJ_GARRISON)/(obj)=(OBJ_SHIPYARD);
   !!VRi^trainer_hero^:S(NO_HERO);     [initialise hero ID]
 
   !!CA(x)/(y)/(z)&(obj)=(OBJ_TOWN):O?(owner:y);
   !!DW(x)/(y)/(z)|(obj)=(OBJ_CREATURE_GENERATOR_1)/(obj)=(OBJ_CREATURE_GENERATOR_4):O?(owner);
-  !!MN(x)/(y)/(z)&(obj)=(OBJ_MINE):O?(owner)/1; [check for owner but don't redraw]
+  !!MN(x)/(y)/(z)|(obj)=(OBJ_MINE)/(obj)=(OBJ_MINE_2)/(obj)=(OBJ_LIGHTHOUSE):O?(owner)/1; [check for owner but don't redraw]
   !!GR(x)/(y)/(z)&(obj)=(OBJ_GARRISON):O?(owner);
   !!SY(x)/(y)/(z)&(obj)=(OBJ_SHIPYARD):O?(owner);
 
-  !!FU(trainer_SelectHeroByPlayer)&i^trainer_hero^=(NO_HERO)/(owner)>(NO_PLAYER):P(owner)/1/0; [look for the hero of the object onwer, activate main dialogue if matches]
+  ; Look for hero of the object onwer, activate main interface if matches
+  !!FU(trainer_SelectHeroByPlayer)&i^trainer_hero^=(NO_HERO)/(owner)>(NO_PLAYER):P(owner)/1/0; 
   !!FU(trainer_MainDialog)&i^trainer_hero^>(NO_HERO)/(owner)>(NO_PLAYER):P;
 
-  !!FU(trainer_SelectHeroMain)&i^trainer_hero^=(NO_HERO)/(owner)=(NO_PLAYER):P; [pops up main dialogue if the object has no owner]
+  ; Pops up main dialogue for asking a name or ID of a hero if the object has no owner
+  !!FU(trainer_SelectHeroMain)&i^trainer_hero^=(NO_HERO)/(owner)=(NO_PLAYER):P; 
 
-  !!if&i^trainer_hero^=(NO_HERO)/(owner)>(NO_PLAYER); [pops up msg if the owner has no hero]
+  ; Pops up msg if the owner of the obejct has no hero
+  !!if&i^trainer_hero^=(NO_HERO)/(owner)>(NO_PLAYER); 
     !!CA(x)/(y)/(z)&(obj)=(OBJ_TOWN):N?(objName:z);
     !!SN|(obj)=(OBJ_CREATURE_GENERATOR_1)/(obj)=(OBJ_CREATURE_GENERATOR_4):T^trainer.dwelling^/?(objName);      
-    !!SN&(obj)=(OBJ_MINE):T^trainer.mine^/?(objName);
+    !!SN|(obj)=(OBJ_MINE)/(obj)=(OBJ_MINE_2)/(obj)=(OBJ_LIGHTHOUSE):T^trainer.mine^/?(objName);
     !!SN&(obj)=(OBJ_GARRISON):T^trainer.garrison^/?(objName);
     !!SN&(obj)=(OBJ_SHIPYARD):T^trainer.shipyard^/?(objName);
     !!SN:T^trainer.objMainNoHero^/?(objMainNoHero:z)/^object^/(objName);
     !!IF:M^%(objMainNoHero)^;
   !!en;
-!!el;                                 [if clicked on other objects, pops up trainer name enter dialogue]
-  !!FU(trainer_SelectHeroMain):P;     [if the right clicked object is not hero/town/dwelling/mine/shipyard, pops up dialogue]
+!!el;
+  ; If clicked on other objects, pops up trainer name enter dialogue
+  ; If the right clicked object is not hero/town/dwelling/mine/shipyard, pops up dialogue
+  !!FU(trainer_SelectHeroMain):P;     
 !!en;
 
 !?FU(trainer_ObjScannerTelpt);
 !#VA(x:x) (y:x) (z:x) (obj:x);
 
-!!if&i^key_alt^;                    [if alt is pressed, move current hero]
+!!if&i^key_alt^;                        [if alt is pressed, move current hero]
   !!OW:A(CURRENT_PLAYER)/?(activeHero:y);
 
-  !!if|(x)>0/(y)>0/(z)>0;               [don't teleport if clicked on outside of the map, sorry to 0/0/0]
-    !!HE(activeHero)&(activeHero)>(NO_HERO):P(x)/(y)/(z);
+  !!if&(activeHero)>(NO_HERO);
+    !!HE(activeHero)|(x)>0/(y)>0/(z)>0:P(x)/(y)/(z);[don't teleport if clicked on outside of the map, sorry to 0/0/0]
+    !!FU:E;                             [exit the funciton if teleported, otherwise pop up dialogue if there is no current hero]
   !!en;
-
-  !!FU&(activeHero)>(NO_HERO):E;        [pop up dialogue if there is no current hero]
 !!en;
 
 !!VRi^trainer_hero^:S(NO_HERO);         [initialise hero ID]
 
-!!SN:T^trainer.titleMovHero^/?z6 T^trainer.legendMovHero^/?z7;
+!!SN:T^trainer.titleMoveHero^/?z6 T^trainer.legendMoveHero^/?z7;
 !!IF:D55/6/7/0/0/0/0/0;
 !!IF:E1/55;
 !!VRz1:H1; **check if text entered, flag 1=1 if yes
@@ -242,8 +247,11 @@ ZVSE2
 !!FU(trainer_SelectHeroByInput)&1:P?(isWrongName:y);
 !!FU&(isWrongName):E;
 
-!!OW:C?(currPlayer:y);
-!!FU(trainer_SelectHeroByPlayer)&i^trainer_hero^=(NO_HERO):P(currPlayer)/0/1;
+; Get a hero of current player if nothing was input
+!!if&i^trainer_hero^=(NO_HERO);
+  !!OW:C?(player:y);
+  !!FU(trainer_SelectHeroByPlayer):P(player)/0/1;
+!!en;
 
 !!if&i^trainer_hero^>(NO_HERO);
   !!HEi^trainer_hero^:P(x)/(y)/(z);
@@ -253,7 +261,7 @@ ZVSE2
 !?FU(trainer_ObjScannerOwner);
 !#VA(x:x) (y:x) (z:x) (obj:x);
 
-!!FU&(obj)<>(OBJ_HERO)/(obj)<>(OBJ_TOWN)/(obj)<>(OBJ_CREATURE_GENERATOR_1)/(obj)<>(OBJ_CREATURE_GENERATOR_4)/(obj)<>(OBJ_MINE)/(obj)<>(OBJ_GARRISON)/(obj)<>(OBJ_SHIPYARD):E;;
+!!FU&(obj)<>(OBJ_HERO)/(obj)<>(OBJ_TOWN)/(obj)<>(OBJ_CREATURE_GENERATOR_1)/(obj)<>(OBJ_CREATURE_GENERATOR_4)/(obj)<>(OBJ_MINE)/(obj)<>(OBJ_MINE_2)/(obj)<>(OBJ_LIGHTHOUSE)/(obj)<>(OBJ_GARRISON)/(obj)<>(OBJ_SHIPYARD):E;;
 
 !!if&i^key_alt^;
   !!FU(trainer_CheckOwner):P(x)/(y)/(z)/(obj)/?(owner:y);
@@ -264,7 +272,12 @@ ZVSE2
   !!FU:E;
 !!en;
 
-!!SN:T^trainer.red^/?z3 T^trainer.blue^/?z4 T^trainer.tan^/?z5 T^trainer.green^/?z6 T^trainer.orange^/?z7 T^trainer.purple^/?z8 T^trainer.teal^/?z9 T^trainer.pink^/?z10 T^trainer.chgMind^/?z12;
+!!SN:T^trainer.chgMind^/?z12;
+
+!!re (zIndex:y)/3/10;
+  !!VR(lineIndex:y):S(zIndex) -3;
+  !!FU(trainer_GetTxtFileString):P^plcolors^/(lineIndex)/?z(zIndex);
+!!en;
 
 !!if&(obj)=(OBJ_HERO);
   !!SN:T^trainer.titleOwnerHero^/?z2/^object^/z1 T^trainer.noOwnerHero^/?z11;
@@ -293,7 +306,7 @@ ZVSE2
   !!CA(x)/(y)/(z):O?(owner);
 !!el|(obj)=(OBJ_CREATURE_GENERATOR_1)/(obj)=(OBJ_CREATURE_GENERATOR_4);
   !!DW(x)/(y)/(z):O?(owner);
-!!el&(obj)=(OBJ_MINE);
+!!el|(obj)=(OBJ_MINE)/(obj)=(OBJ_MINE_2)/(obj)=(OBJ_LIGHTHOUSE);
   !!MN(x)/(y)/(z):O?(owner)/1;           [set for owner and redraw]
 !!el&(obj)=(OBJ_GARRISON);
   !!GR(x)/(y)/(z):O?(owner);
@@ -327,7 +340,7 @@ ZVSE2
 !!el|(obj)=(OBJ_CREATURE_GENERATOR_1)/(obj)=(OBJ_CREATURE_GENERATOR_4);
   !!DW(x)/(y)/(z):O(ownerNew);
   !!VR(sound):S^Military.wav^;
-!!el&(obj)=(OBJ_MINE);
+!!el|(obj)=(OBJ_MINE)/(obj)=(OBJ_MINE_2)/(obj)=(OBJ_LIGHTHOUSE);
   !!MN(x)/(y)/(z):O(ownerNew)/0;           [set for owner and redraw]
   !!VR(sound):S^flagmine.wav^;
 !!el&(obj)=(OBJ_GARRISON);
@@ -522,8 +535,9 @@ The game may fall at any time.^;
   !!CD:D(INT_MAX) M0;
 !!en;
 
-!?FU(OnAfterBuildTownBuilding)&1000;    [trigger for human player only]
+!?FU(OnAfterBuildTownBuilding)&i^trainer_builder_on^/1000; [trigger for human player only]
 !#VA(townId:x);
+
 !!CA0/(townId):R(FALSE);
 
 !?FU(OnTownMouseClick)&i^trainer_builder_on^/i^mouse_item^>=0/i^mouse_item^<=43;

@@ -7,18 +7,9 @@
   },
 
   "trainer":  {
-    "red":  "Red",
-    "blue": "Blue",
-    "tan":  "Tan",
-    "green":  "Green",
-    "orange": "Orange",
-    "purple": "Purple",
-    "teal": "Teal",
-    "pink": "Pink",
-
     "wrongName": "We coudn't locate this hero. Maybe the name is wrong?",
     "noHero":  "You have no hero. Recruit one and then retry!",
-    "titleMain":  "Trainer: set any hero/player properties",
+    "titleMain":  "Trainer: Set any hero/player properties",
     "legendMain": "Enter the hero's name or number (leave empty for heroes of current player).",
 
     "forgAllSpl": "Do you want @hero@ to forget all the spells?",
@@ -34,17 +25,9 @@
     "expert": "Expert",
 
     "resNoPlayer":  "This hero belongs to no player. Modifying resources does not work.",
-    "wood": "Wood",
-    "mercury": "Mercury",
-    "ore":  "Ore",
-    "sulfer": "Sulfur",
-    "crystal":  "Crystal",
-    "gems": "Gems",
-    "gold": "Gold",
-    "mithril": "Mithril",
     "much": "much",
     "many": "many",
-    "titleRes": "Change how @qty@ @res@ the @colour@ player has.",
+    "titleRes": "Change how @qty@ @res@ the @colour@ player should have.",
     "legendRes":    "Enter a number of @res@.",
 
     "heroLvReset":  "Do you want @hero@ to be reset to level 1 and forget all the skills?",
@@ -54,10 +37,6 @@
 
     "titlePs":  "Change the @ps@ of @hero@.",
     "legendPs": "Enter a number of @ps@ (@min@..@max@).",
-    "attack": "Attack",
-    "defense":  "Defense",
-    "power":  "Power",
-    "knowledge":  "Knowledge",
 
     "titleAddMon": "How many @mon@ do you want to give to @hero@?",
     "legendAddMon": "Enter a number of creatures to give.",
@@ -112,7 +91,7 @@
     "shaman": "{~Chartreuse}@cmd@{~}\n\nClass Specific Skills:\n\n150% of Hero's Attack and Defense.\nMay cast Haste.",
     "astralSpirit": "{~Chartreuse}@cmd@{~}\n\nClass Specific Skills:\n\nEnemy creatures run away before battle.\nMay cast Counterstrike.",
 
-    "titleCmdLv":  "Change the level of the commander.\n\nWarning: You won't get to the level up dialogue even if a greater level is set.",
+    "titleCmdLv":  "Change the level of the commander.\n\nWarning: This will only set the level of your commander without level up dialogue.",
     "legendCmdLv": "Enter a number of level (1..@max@).",
     "cmdLvDesc": "Level @lv@",
 
@@ -125,7 +104,7 @@
     "objOff": "{~White}Disabled Objects/Events/Hero modifications (F3){~}",
     "objOn":  "Enabled Objects/Events/Hero modifications (F3)",
     "objScanner": "Trainer: ",
-    "objTitle":  "Select an action to do.\n\nShotcuts: Alt-click to repeat the last action. Alt+num to change options.",
+    "objTitle":  "Select an action to do.\n\nAlt-click to repeat the last action. Alt+num keys to change options.",
     "objMain":  "Edit heroes/players",
     "objMainNoHero":  "The owner of @object@ has no hero! How unfortunate!",
     "dwelling": "the dwelling",
@@ -133,7 +112,7 @@
     "garrison":   "the garrision",
     "shipyard":   "the shipyard",
     "objMovHero":  "Move any hero",
-    "objMovHeroAlt": "Move heroes (prioritise on current)",
+    "objMovHeroAlt": "Move any hero (prioritise on current)",
     "objOwner":    "Change owners",
     "objOwnerAlt":  "Change owners (current: @owner@)",
     "objDel":  "Delete objects",
@@ -144,7 +123,7 @@
     "objRemoveAll": "Demolish all buildings",
     "chgMind": "I changed my mind",
     "disableAltClick":  "Disable Alt-click",
-    "titleMovHero":  "Trainer: move any hero",
+    "titleMovHero":  "Trainer: Move any hero",
     "legendMovHero":  "Enter the hero's name or number (leave empty for heroes of current player).",
     "objTelptNoHero": "You have no hero to teleport with! Where did you hide them?",
     "titleOwner":  "Choose a new owner for @object@.",

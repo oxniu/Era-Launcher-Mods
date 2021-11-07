@@ -24,13 +24,13 @@ ZVSE2
 ; FU7780018 hero army
 ; FU7780019 *removed*
 ; FU7780020 *removed*
-; FU7780021 transfer creatures from pool to army
+; FU7780021 *removed*
 ; FU7780022 *removed*
 ; FU7780023 *removed*
 ; FU7780024 *removed*
-; FU7780025 get commander skills values
+; FU7780025 *removed*
 ; FU7780026 *removed*
-; FU7780027 get commander types display
+; FU7780026 *removed*
 ; FU7780028 *removed*
 ; FU7780029 *removed*
 ; FU7780030 *removed*
@@ -115,30 +115,32 @@ ZVSE2
 !?FU(trainer_SelectHeroByPlayer);
 !#VA(player:x) (isOSMain:x) (isOSTelpt:x);[x2 - mode for Object Scanner main, x3 - mode for Object Scanner teleportation]
 
-!!OW:A(player)/?(activeHero:y);         [check active hero of the player]
+!!OW:A(player)/?(hero:y);         [check active hero of the player]
 
-!!if&(activeHero)>(NO_HERO);
-  !!VRi^trainer_hero^:S(activeHero);
+; Get the active hero if available
+!!if&(hero)>(NO_HERO);
+  !!VRi^trainer_hero^:S(hero);
 !!el;                                   [if no active hero, check for heroes on the map]
-  !!VRv2:S(NO_HERO);
-  !!OW:H(player)/2/1;                   [check the first hero of the player and store in v2]
+  ; Get the first hero of the list if no active
+  !!OW:O(player)/0/?(hero);
 
-  !!if&v2>(NO_HERO);
-    !!VRi^trainer_hero^:Sv2;
+  !!if&(hero)>(NO_HERO);
+    !!VRi^trainer_hero^:S(hero);
+  !!el;
+    ; if not on the map...in towns maybe? excluding OS teleporation - serious bugs if teleporting a hero from a town
+    !!if&(isOSTelpt);
+      !!IF:M^%T(trainer.objTelptNoHero)^;
+    !!el;
+      ; Search for heroes in towns if not teleporting feature
+      !!re i/(HERO_FIRST)/(HERO_LAST_WOG);
+        !!HEi:O?(owner:y);
+        !!VRi^trainer_hero^&(player)=(owner):Si;
 
-  !!el&(isOSTelpt);
-    !!IF:M^%T(trainer.objTelptNoHero)^;
+        !!br&(player)=(owner);
+      !!en;
 
-  !!el&(isOSTelpt)=(FALSE);
-    !!re i/(HERO_FIRST)/(HERO_LAST_WOG);[if not on the map...in towns maybe? excluding OS teleporation - serious bugs if teleporting a hero from a town]
-      !!HEi:O?(owner:y);
-      !!VRi^trainer_hero^&(player)=(owner):Si;
-
-      !!br&(player)=(owner);
-    !!en;
-
-    !!if&i>(HERO_LAST_WOG)/(isOSMain)=(FALSE); [pop up msg if no hero, excluding OS main second search]
-      !!IF:M^%T(trainer.noHero)^;
+      ; pop up msg if no hero, excluding OS main second search
+      !!IF&i>(HERO_LAST_WOG)/(isOSMain)=(FALSE):M^%T(trainer.noHero)^;
     !!en;
   !!en;
 !!en;
@@ -161,7 +163,7 @@ ZVSE2
 !!VRi^trainer_dialogEnabled^:S(TRUE);   [flag for trainer interface]
 
 !!if&i^wog42_on^=(FALSE);               [Archer - hide mithril if disabled]
-  !!DL(TRAINER_MAIN_DLG):A113/4/0;      [113 - another item for mithril]
+  !!DL(TRAINER_MAIN_DLG):A113/(DLG_CMD_SET_DEF_FRAME)/0;      [113 - another item for mithril]
   !!VRz30:S^^;                          [BE VERY CAREFUL! Always avoid z30 to z32 in other places of this script - need DL mouse hovering trigger to fix]
   !!DL(TRAINER_MAIN_DLG):H(TRAINER_MITHRIL_AREA)/z30; [DL:H doesn't work on ^^]
 !!en;
@@ -189,7 +191,7 @@ ZVSE2
 !!DO7780018/0/6/1:P(hero); hero army
 !!FU(trainer_RefreshMonTable):Pi^trainer_monTablePage^;
 
-!!DL(TRAINER_MAIN_DLG):A99/11/z2/1;
+!!DL(TRAINER_MAIN_DLG):A99/(DLG_CMD_SET_PCX)/z2/1;
 !!SN:W^Fire_school^/1;
 !!SN:W^Air_school^/0;
 !!SN:W^Water_school^/0;
@@ -201,21 +203,23 @@ ZVSE2
 !!VR(player:y):Si^trainer_player^;
 !!DO7780014/0/7/1&(player)>(NO_PLAYER):P(player)/10; [Archer - check resources including mithril]
 
+; Set up 0 resoruces for hero without owner
 !!if&(player)=(NO_PLAYER);
   !!VRz5:S^0^;
 
   !!re (item:y)/21/27;
-    !!DL(TRAINER_MAIN_DLG):A(item)/3/z5/1;
+    !!DL(TRAINER_MAIN_DLG):A(item)/(DLG_CMD_SET_TEXT)/z5/1;
   !!en;
 
-  !!DL(TRAINER_MAIN_DLG)&i^wog42_on^:A(TRAINER_MITHRIL_AREA)/3/z5/1;    [set mithril value]
+  !!DL(TRAINER_MAIN_DLG)&i^wog42_on^:A(TRAINER_MITHRIL_AREA)/(DLG_CMD_SET_TEXT)/z5/1;    [set mithril value]
 !!en;
 
-!!FU(trainer_RefreshOnLevelUp):P(hero);
+!!FU(trainer_RefreshDlgsOnLevelUp):P(hero);
 
 !!DL(TRAINER_MAIN_DLG):S1;
+!!SN:D;                                 [redraw screen after DL is closed - Thanks to daemon_n!]
 
-!?FU(trainer_RefreshOnLevelUp);
+!?FU(trainer_RefreshDlgsOnLevelUp);
 !#VA(hero:x);
 
 !!FU(trainer_RefreshArtTable):Pi^trainer_artTablePage^;
@@ -230,36 +234,40 @@ ZVSE2
 !?FU(trainer_RefreshMoveBar);
 !#VA(hero:x);
 
-!!HE(hero):G?(maxMove:y) W?(currMove:y)/1; get movement
-!!DL(TRAINER_MAIN_DLG)&(currMove)<110:A30/4/0/1; set frames for movement def empty
-!!DL(TRAINER_MAIN_DLG)&(currMove)<500/(currMove)>=110:A30/4/1/1;  few
-!!DL(TRAINER_MAIN_DLG)&(maxMove)=(currMove):A30/4/2/1;  normal
-!!DL(TRAINER_MAIN_DLG)&(currMove)>(maxMove):A30/4/3/1;  extra
+!!HE(hero):W?(currMove:y)/1;
+
+!!if&(currMove)<=0;
+  !!VR(moveCadre:y):S0;
+!!el&(currMove)>0/(currMove)<2300;
+  !!VR(moveCadre):S(currMove) -1 :100 +1;
+!!el&(currMove)>=2300/(currMove)<2500;
+  !!VR(moveCadre):S23;
+!!el&(currMove)>=2500/(currMove)<2800;
+  !!VR(moveCadre):S24;
+!!el&(currMove)>=2800;
+  !!VR(moveCadre):S25;
+!!en;
+
+!!DL(TRAINER_MAIN_DLG):A30/(DLG_CMD_SET_DEF_FRAME)/(moveCadre)/1;
 
 !?FU(trainer_RefreshManaBar);
 !#VA(hero:x);
 
-!!HE(hero):Fd/d/d/?(knl:y); get knowledge
-!!HE(hero):I?(currMana:y)/1;    get mana
-!!VR(maxMana:y):S(knl) *10; match knowledge to mana
-!!HE(hero):S(SKILL_INTELLIGENCE)/?(intLv:y); get intelligence rank %25/%50/%100
+!!HE(hero):I?(currMana:y)/1;
 
-!!if&(intLv)>(SKILL_NOT_LEARNED);
-  !!if&(intLv)=(SKILL_BASIC);
-    !!VR(intBonus:y):S(maxMana):4;
-    !!VR(maxMana):+(intBonus);
-  !!el&(intLv)=(SKILL_ADVANCED);
-    !!VR(intBonus):S(maxMana):2;
-    !!VR(maxMana):+(intBonus);
-  !!el;
-    !!VR(maxMana):*2;
-  !!en;
+!!if&(currMana)<=0;
+  !!VR(manaCadre:y):S0;
+!!el&(currMana)>0/(currMana)<111;
+  !!VR(manaCadre):S(currMana) -1 :5 +1;
+!!el&(currMana)>=111/(currMana)<145;
+  !!VR(manaCadre):S23;
+!!el&(currMana)>=145/(currMana)<170;
+  !!VR(manaCadre):S24;
+!!el(currMana)>=170;
+  !!VR(manaCadre):S25;
 !!en;
 
-!!DL(TRAINER_MAIN_DLG)&(currMana)<5:A31/4/0/1; if mana below 5, empty frame
-!!DL(TRAINER_MAIN_DLG)&(currMana)>=5/(currMana)<(maxMana):A31/4/1/1;
-!!DL(TRAINER_MAIN_DLG)&(currMana)=(maxMana):A31/4/2/1;
-!!DL(TRAINER_MAIN_DLG)&(currMana)>(maxMana):A31/4/3/1;
+!!DL(TRAINER_MAIN_DLG):A31/(DLG_CMD_SET_DEF_FRAME)/(manaCadre)/1;
 
 !?FU318717; © Master Of Puppets
 ; x1 - hero number
@@ -274,16 +282,36 @@ ZVSE2
 !!DO318727/1/512/1:Py1/x2 Py2/x3;
 
 !?FU(trainer_GetPlayerStr);
-!#VA(player:x);
+!#VA(player:x) (playerStrIndex:x);
 
-!!SN&(player)=(PLAYER_RED):T^trainer.red^/?s^trainer_player^;
-!!SN&(player)=(PLAYER_BLUE):T^trainer.blue^/?s^trainer_player^;
-!!SN&(player)=(PLAYER_TAN):T^trainer.tan^/?s^trainer_player^;
-!!SN&(player)=(PLAYER_GREEN):T^trainer.green^/?s^trainer_player^;
-!!SN&(player)=(PLAYER_ORANGE):T^trainer.orange^/?s^trainer_player^;
-!!SN&(player)=(PLAYER_PURPLE):T^trainer.purple^/?s^trainer_player^;
-!!SN&(player)=(PLAYER_TEAL):T^trainer.teal^/?s^trainer_player^;
-!!SN&(player)=(PLAYER_PINK):T^trainer.pink^/?s^trainer_player^;
+!!FU(trainer_GetTxtFileString):P^plcolors^/(player)/?s^trainer_player^;
+
+!?FU(trainer_GetTxtFileString);
+!#VA(txtFileName:x) (stringNum:x) (string:x);
+
+!!VR(txtLoadAddres:y):S0;
+
+!!FU(StrToLower):Pz(txtFileName)/?(txtName:z);
+
+!!if|(txtName)=^priskill.txt^/(txtName)=^priskill^;
+  !!VR(txtLoadAddres):+6974556;ps
+!!el|(txtName)=^restypes.txt^/(txtName)=^restypes^;
+  !!VR(txtLoadAddres):+6968208;rest
+!!el|(txtName)=^plcolors.txt^/(txtName)=^plcolors^;
+  !!VR(txtLoadAddres):+6976900;plcol
+!!el;
+  !!VR(string):Z^Wrong txt file name!^;
+  !!FU:E;
+!!en;
+
+; @Master Of Puppets
+!!UN:C(txtLoadAddres)/4/?y1;            
+!!VRy1:+32;
+!!UN:Cy1/4/?y2;
+!!VR(stringNum):*4+y2;
+!!UN:C(stringNum)/4/?y1;
+!!SN:X?y4 Xy1 X?z1 Xy4;
+!!VR(string):Z^%z1^;
 
 !?FU(trainer_SetDlgColour);
 !!SN:E7510739/1/x1;
@@ -318,7 +346,7 @@ ZVSE2
 
 ; keep the Trainer Interface if the hero has leveled up upon clicking checkmark, otherwise close the dialogue
 !!if&(hasLeveledUp);
-  !!FU(trainer_RefreshOnLevelUp):P(hero);
+  !!FU(trainer_RefreshDlgsOnLevelUp):P(hero);
 !!el;
   !!DL(TRAINER_MAIN_DLG):C1;
   !!HE(hero):E?(exp)/(lvNew);
@@ -327,7 +355,6 @@ ZVSE2
     !!VRi^Fire_%(item)^:S(FALSE);
   !!en;
 
-  !!UN:R1 R2;                           [Redraw]
   !!VRi^trainer_dialogEnabled^:S(FALSE);[flag for trainer interface]
 !!en;
 
@@ -391,13 +418,13 @@ ZVSE2
 !!SN:W^Water_school^/?y3;
 !!SN:W^Earth_School^/?y4;
 !!DO7780005/36/53/1&y1=1:P18;           [fire-->air]
-!!DL(TRAINER_MAIN_DLG)&y1=1:A11/4/1/1;
+!!DL(TRAINER_MAIN_DLG)&y1=1:A11/(DLG_CMD_SET_DEF_FRAME)/1/1;
 !!DO7780006/36/53/1&y2=1:P36;           [air-->water]
-!!DL(TRAINER_MAIN_DLG)&y2=1:A11/4/2/1;
+!!DL(TRAINER_MAIN_DLG)&y2=1:A11/(DLG_CMD_SET_DEF_FRAME)/2/1;
 !!DO7780007/36/53/1&y3=1:P54;           [water-->earth]
-!!DL(TRAINER_MAIN_DLG)&y3=1:A11/4/3/1;
+!!DL(TRAINER_MAIN_DLG)&y3=1:A11/(DLG_CMD_SET_DEF_FRAME)/3/1;
 !!DO7780008/36/53/1&y4=1:P0;            [Archer - earth-->fire]
-!!DL(TRAINER_MAIN_DLG)&y4=1:A11/4/0/1;
+!!DL(TRAINER_MAIN_DLG)&y4=1:A11/(DLG_CMD_SET_DEF_FRAME)/0/1;
 !!SN&y1=1:W^Air_school^/1;
 !!SN&y1=1:W^Fire_school^/0;
 !!SN&y2=1:W^Water_school^/1;
@@ -411,19 +438,19 @@ ZVSE2
 
 !?FU7780005;
 ; display air spells icons
-!!DL(TRAINER_MAIN_DLG):Ax16/4/x1/1;
+!!DL(TRAINER_MAIN_DLG):Ax16/(DLG_CMD_SET_DEF_FRAME)/x1/1;
 !!VRx1:+1;
 !?FU7780006;
 ; display water spells icons
-!!DL(TRAINER_MAIN_DLG):Ax16/4/x1/1;
+!!DL(TRAINER_MAIN_DLG):Ax16/(DLG_CMD_SET_DEF_FRAME)/x1/1;
 !!VRx1:+1;
 !?FU7780007;
 ; display earth spells icons
-!!DL(TRAINER_MAIN_DLG):Ax16/4/x1/1;
+!!DL(TRAINER_MAIN_DLG):Ax16/(DLG_CMD_SET_DEF_FRAME)/x1/1;
 !!VRx1:+1;
 !?FU7780008;
 ; display fire spells icons
-!!DL(TRAINER_MAIN_DLG):Ax16/4/x1/1;
+!!DL(TRAINER_MAIN_DLG):Ax16/(DLG_CMD_SET_DEF_FRAME)/x1/1;
 !!VRx1:+1;
 
 ; button magic schools/left
@@ -433,13 +460,13 @@ ZVSE2
 !!SN:W^Air_school^/?y3;
 !!SN:W^Fire_school^/?y4;
 !!DO7780006/36/53/1&y1=1:P36;           [earth-->water]
-!!DL(TRAINER_MAIN_DLG)&y1=1:A11/4/2/1;
+!!DL(TRAINER_MAIN_DLG)&y1=1:A11/(DLG_CMD_SET_DEF_FRAME)/2/1;
 !!DO7780005/36/53/1&y2=1:P18;           [water-->air]
-!!DL(TRAINER_MAIN_DLG)&y2=1:A11/4/1/1;
+!!DL(TRAINER_MAIN_DLG)&y2=1:A11/(DLG_CMD_SET_DEF_FRAME)/1/1;
 !!DO7780008/36/53/1&y3=1:P0;            [air-->fire]
-!!DL(TRAINER_MAIN_DLG)&y3=1:A11/4/0/1;
+!!DL(TRAINER_MAIN_DLG)&y3=1:A11/(DLG_CMD_SET_DEF_FRAME)/0/1;
 !!DO7780008/36/53/1&y4=1:P54;            [fire-->earth]
-!!DL(TRAINER_MAIN_DLG)&y4=1:A11/4/3/1;
+!!DL(TRAINER_MAIN_DLG)&y4=1:A11/(DLG_CMD_SET_DEF_FRAME)/3/1;
 !!SN&y1=1:W^Water_school^/1;
 !!SN&y1=1:W^Earth_school^/0;
 !!SN&y2=1:W^Air_school^/1;
@@ -492,13 +519,13 @@ ZVSE2
 !!VRy30&y4=1/i^Earth_%i(mouse_item)^=1:S1;
 
 !!if&y30=0;
-  !!DL(TRAINER_MAIN_DLG):Ai^mouse_item^/4/1/1; [set to selected]
+  !!DL(TRAINER_MAIN_DLG):Ai^mouse_item^/(DLG_CMD_SET_DEF_FRAME)/1/1; [set to selected]
   !!SN&y1=1:W^Fire_%i(mouse_item)^/1;
   !!SN&y2=1:W^Air_%i(mouse_item)^/1;
   !!SN&y3=1:W^Water_%i(mouse_item)^/1;
   !!SN&y4=1:W^Earth_%i(mouse_item)^/1;
 !!el;
-  !!DL(TRAINER_MAIN_DLG):Ai^mouse_item^/4/0/1; [set to de-selected]
+  !!DL(TRAINER_MAIN_DLG):Ai^mouse_item^/(DLG_CMD_SET_DEF_FRAME)/0/1; [set to de-selected]
   !!SN&y1=1:W^Fire_%i(mouse_item)^/0;
   !!SN&y2=1:W^Air_%i(mouse_item)^/0;
   !!SN&y3=1:W^Water_%i(mouse_item)^/0;
@@ -556,7 +583,7 @@ ZVSE2
         !!VRi^Air_%i^:S1;
         !!VRi^Water_%i^:S1;
         !!VRi^Earth_%i^:S1;
-        !!DL(TRAINER_MAIN_DLG):Ai/4/1/1;
+        !!DL(TRAINER_MAIN_DLG):Ai/(DLG_CMD_SET_DEF_FRAME)/1/1;
       !!en;
       !!FU:E;
     !!en;
@@ -577,7 +604,7 @@ ZVSE2
         !!VRi^Air_%i^:S1;
         !!VRi^Water_%i^:S1;
         !!VRi^Earth_%i^:S1;
-        !!DL(TRAINER_MAIN_DLG):Ai/4/1/1;
+        !!DL(TRAINER_MAIN_DLG):Ai/(DLG_CMD_SET_DEF_FRAME)/1/1;
       !!en;
       !!FU:E;
     !!en;
@@ -661,7 +688,7 @@ ZVSE2
 
 !?FU7780004;
 ; Spell cadres reset to 0
-!!DL(TRAINER_MAIN_DLG):Ax16/4/0/1;
+!!DL(TRAINER_MAIN_DLG):Ax16/(DLG_CMD_SET_DEF_FRAME)/0/1;
 
 !?FU(OnCustomDialogEvent)&i^dlg_id^=(TRAINER_MAIN_DLG)/i^mouse_item^=54/i^mouse_action^=(MOUSE_RMB_PRESSED);
 !!if&i^Fire_school^;
@@ -772,35 +799,41 @@ ZVSE2
 !?FU(trainer_SetSecSkillCadre);
 !#VA(ss:x) (ssLv:x) (ssItem:x) (ssHighlight:x);
 
-!!DL(TRAINER_MAIN_DLG)&(ssLv)<=(SKILL_ADVANCED):A(ssHighlight)/4/0/1; [not learned/basic/advanced - no highlight]
+!!VR(hero:y):Si^trainer_hero^;
+!!DL(TRAINER_MAIN_DLG)&(ssLv)<=(SKILL_ADVANCED):A(ssHighlight)/(DLG_CMD_SET_DEF_FRAME)/0/1; [not learned/basic/advanced - no highlight]
 
-!!if&(ssLv)>(SKILL_ADVANCED)/i^Advanced_Classes_Mod_Active^=(FALSE);
-  !!DL(TRAINER_MAIN_DLG):A(ssHighlight)/4/1/1; [expert - highlighted]
-!!en;
-
-!!if&(ssLv)=(SKILL_NOT_LEARNED);        [set up cadre - not learned - dark icon]
-  !!VR(ssCadInd:y):S(ss) +28;
-!!el;
+!!if&(ssLv)<=(SKILL_ADVANCED);
+  !!VR(highlight:y):S0;
   !!VR(ssCadInd:y):S(ss);
 !!en;
 
-!!DL(TRAINER_MAIN_DLG):A(ssItem)/4/(ssCadInd)/1;
+!!if&(ssLv)>(SKILL_ADVANCED)&i^Advanced_Classes_Mod_Active^=(FALSE);
+  !!VR(highlight):S1;                   [Expert - Gold]
+  !!VR(ssCadInd):S(ss) +28;
+!!en;
 
 !!if&i^Advanced_Classes_Mod_Active^;
-  !!VR(hero:y):Si^trainer_hero^;
   !!SN:Mi^acm_ssNames^/(ss)/?(ssName:z);
 
-  !!if&i^H3_%(ssName)_1_Hero%(hero)^;
-    !!DL(TRAINER_MAIN_DLG):A(ssHighlight)/4/1/1; [grand master - highlighted (ACM)]
-  !!el;
-    !!DL(TRAINER_MAIN_DLG):A(ssHighlight)/4/0/1;
+  !!if&(ssLv)>(SKILL_ADVANCED);
+    !!if&i^H3_%(ssName)_0_Hero%(hero)^<>(TRUE)/i^H3_%(ssName)_1_Hero%(hero)^<>(TRUE);
+      !!VR(highlight):S1;               [Expert - Gold]
+      !!VR(ssCadInd):S(ss);
+    !!el&i^H3_%(ssName)_0_Hero%(hero)^/i^H3_%(ssName)_1_Hero%(hero)^<>(TRUE);
+      !!VR(highlight):S2;               [Master - Green]
+      !!VR(ssCadInd):S(ss);
+    !!el&i^H3_%(ssName)_0_Hero%(hero)^/i^H3_%(ssName)_1_Hero%(hero)^;
+      !!VR(highlight):S3;               [Grand Master - Red]
+      !!VR(ssCadInd):S(ss) +28;
+    !!en;
   !!en;
+
+  !!DO(AC_Set_SS_Description)/(SEC_SKILL_FIRST)/(SEC_SKILL_LAST)/1:P(hero); [Set new Skill descriptions for ACM]
+  !!DO(AC_Set_SS_Names)/(SEC_SKILL_FIRST)/(SEC_SKILL_LAST)/1:P(hero);       [Set new Skill names for ACM]
 !!en;
 
-!!if&i^Advanced_Classes_Mod_Active^;
-  !!DO(AC_Set_SS_Description)/(SEC_SKILL_FIRST)/(SEC_SKILL_LAST)/1:Pi^trainer_hero^; [Set new Skill descriptions for ACM]
-  !!DO(AC_Set_SS_Names)/(SEC_SKILL_FIRST)/(SEC_SKILL_LAST)/1:Pi^trainer_hero^;       [Set new Skill names for ACM]
-!!en;
+!!DL(TRAINER_MAIN_DLG):A(ssHighlight)/(DLG_CMD_SET_DEF_FRAME)/(highlight)/1;
+!!DL(TRAINER_MAIN_DLG):A(ssItem)/(DLG_CMD_SET_DEF_FRAME)/(ssCadInd)/1;
 
 ***************** End Secondary Skills *****************
 
@@ -810,18 +843,18 @@ ZVSE2
 ; x1 player ID
 !!OW:Rx1/x16/?y1;
 !!VRzx2:M3/y1;                          [convert var to z]
-!!DL(TRAINER_MAIN_DLG)&x16=0:A21/3/zx2/1;[change resources value in hints]
-!!DL(TRAINER_MAIN_DLG)&x16=1:A22/3/zx2/1;
-!!DL(TRAINER_MAIN_DLG)&x16=2:A23/3/zx2/1;
-!!DL(TRAINER_MAIN_DLG)&x16=3:A24/3/zx2/1;
-!!DL(TRAINER_MAIN_DLG)&x16=4:A25/3/zx2/1;
-!!DL(TRAINER_MAIN_DLG)&x16=5:A26/3/zx2/1;
-!!DL(TRAINER_MAIN_DLG)&x16=6:A27/3/zx2/1;
-!!DL(TRAINER_MAIN_DLG)&x16=7/i^wog42_on^:A(TRAINER_MITHRIL_AREA)/3/zx2/1; [Archer - mithril]
+!!DL(TRAINER_MAIN_DLG)&x16=0:A21/(DLG_CMD_SET_TEXT)/zx2/1;[change resources value in hints]
+!!DL(TRAINER_MAIN_DLG)&x16=1:A22/(DLG_CMD_SET_TEXT)/zx2/1;
+!!DL(TRAINER_MAIN_DLG)&x16=2:A23/(DLG_CMD_SET_TEXT)/zx2/1;
+!!DL(TRAINER_MAIN_DLG)&x16=3:A24/(DLG_CMD_SET_TEXT)/zx2/1;
+!!DL(TRAINER_MAIN_DLG)&x16=4:A25/(DLG_CMD_SET_TEXT)/zx2/1;
+!!DL(TRAINER_MAIN_DLG)&x16=5:A26/(DLG_CMD_SET_TEXT)/zx2/1;
+!!DL(TRAINER_MAIN_DLG)&x16=6:A27/(DLG_CMD_SET_TEXT)/zx2/1;
+!!DL(TRAINER_MAIN_DLG)&x16=7/i^wog42_on^:A(TRAINER_MITHRIL_AREA)/(DLG_CMD_SET_TEXT)/zx2/1; [Archer - mithril]
 
 !!if&i^wog42_on^=(FALSE);
   !!VRz30:S^^;
-  !!DL(TRAINER_MAIN_DLG)&x16=7:A(TRAINER_MITHRIL_AREA)/3/z30/1;
+  !!DL(TRAINER_MAIN_DLG)&x16=7:A(TRAINER_MITHRIL_AREA)/(DLG_CMD_SET_TEXT)/z30/1;
 !!en;
 
 !!VRx2:+1;                              [increment for next loop]
@@ -842,14 +875,7 @@ ZVSE2
 !!VRy1&y30=1:Si^mouse_item^ -21;
 !!VRy1&y30=2:S7;
 
-!!SN&y1=(RES_WOOD):T^trainer.wood^/?z5;
-!!SN&y1=(RES_MERCURY):T^trainer.mercury^/?z5;
-!!SN&y1=(RES_ORE):T^trainer.ore^/?z5;
-!!SN&y1=(RES_SULFUR):T^trainer.sulfer^/?z5;
-!!SN&y1=(RES_CRYSTAL):T^trainer.crystal^/?z5;
-!!SN&y1=(RES_GEMS):T^trainer.gems^/?z5;
-!!SN&y1=(RES_GOLD):T^trainer.gold^/?z5;
-!!SN&y1=(RES_MITHRIL):T^trainer.mithril^/?z5;
+!!FU(trainer_GetTxtFileString):P^restypes.txt^/y1/?z5;
 
 !!SN&y1<>(RES_GEMS):T^trainer.much^/?z8;
 !!SN&y1=(RES_GEMS):T^trainer.many^/?z8; [use "many" for gem]            
@@ -884,15 +910,7 @@ ZVSE2
 
 !!VR(resType:y)&(flag)=1:Si^mouse_item^ -21;
 !!VR(resType)&(flag)=2:S(RES_MITHRIL);
-
-!!SN&(resType)=(RES_WOOD):T^trainer.wood^/?(resStr:z);
-!!SN&(resType)=(RES_MERCURY):T^trainer.mercury^/?(resStr);
-!!SN&(resType)=(RES_ORE):T^trainer.ore^/?(resStr);
-!!SN&(resType)=(RES_SULFUR):T^trainer.sulfer^/?(resStr);
-!!SN&(resType)=(RES_CRYSTAL):T^trainer.crystal^/?(resStr);
-!!SN&(resType)=(RES_GEMS):T^trainer.gems^/?(resStr);
-!!SN&(resType)=(RES_GOLD):T^trainer.gold^/?(resStr);
-!!SN&(resType)=(RES_MITHRIL):T^trainer.mithril^/?(resStr);
+!!FU(trainer_GetTxtFileString):P^restypes.txt^/(resType)/?(resStr:z);
 !!OW:Ri^trainer_player^/(resType)/?(resQty:y);
 !!IF:Q1/(resType)/(resQty)/4^%(resStr)^;
 
@@ -903,7 +921,7 @@ ZVSE2
 !?FU(trainer_RefreshHeroLevel);
 ; x1 hero level
 !!VRz21:S^%x1^;
-!!DL(TRAINER_MAIN_DLG):A147/3/z21/1;    [do not change z21!]
+!!DL(TRAINER_MAIN_DLG):A147/(DLG_CMD_SET_TEXT)/z21/1;    [do not change z21!]
 
 !?FU(OnCustomDialogEvent)&i^dlg_id^=(TRAINER_MAIN_DLG)/i^mouse_item^=1/i^mouse_action^=(MOUSE_LMB_PRESSED);
 !!SN:W^trainer_hero^/?y3;
@@ -928,10 +946,10 @@ ZVSE2
 
 !?FU7780033;
 !!VRy1:Sx16 -27;
-!!DL(TRAINER_MAIN_DLG):Ax16/4/y1/1;
+!!DL(TRAINER_MAIN_DLG):Ax16/(DLG_CMD_SET_DEF_FRAME)/y1/1;
 
 !?FU7780034;
-!!DL(TRAINER_MAIN_DLG):Ax16/4/0/1;
+!!DL(TRAINER_MAIN_DLG):Ax16/(DLG_CMD_SET_DEF_FRAME)/0/1;
 
 !?FU(OnCustomDialogEvent)&i^dlg_id^=(TRAINER_MAIN_DLG)/i^mouse_item^=147/i^mouse_action^=(MOUSE_LMB_PRESSED); [set hero level by entering number]
 !!SN:T^trainer.titleHeroLv^/?z2/^hero^/s^trainer_heroName^;
@@ -1025,7 +1043,7 @@ ZVSE2
 !!VRz18|(pwr)<1/(pwr)>(psCap):S^{~red}%(pwr){~}^;
 !!VRz19|(knl)<1/(knl)>(psCap):S^{~red}%(knl){~}^;
 
-!!DL(TRAINER_MAIN_DLG):A141/3/z16/1 A142/3/z17/1 A143/3/z18/1 A144/3/z19/1;
+!!DL(TRAINER_MAIN_DLG):A141/(DLG_CMD_SET_TEXT)/z16/1 A142/(DLG_CMD_SET_TEXT)/z17/1 A143/(DLG_CMD_SET_TEXT)/z18/1 A144/(DLG_CMD_SET_TEXT)/z19/1;
 
 !?FU(OnCustomDialogEvent)&i^dlg_id^=(TRAINER_MAIN_DLG)/i^mouse_action^=(MOUSE_RMB_PRESSED);
 !!VR(flag:y):S(FALSE);                  [get clicked location]
@@ -1038,16 +1056,8 @@ ZVSE2
 !!VR(psPicType:y):S(psType) +31;
 
 !!FU(GetHeroPrimarySkillsWithoutArts):Pi^trainer_hero^/?(atk:y)/?(def:y)/?(pwr:y)/?(knl:y);
-
-!!if&(psType)=(SKILL_ATTACK);
-  !!IF:Q1/(psPicType)/(atk)/4^%T(trainer.attack)^;
-!!el&(psType)=(SKILL_DEFENSE);
-  !!IF:Q1/(psPicType)/(def)/4^%T(trainer.defense)^;
-!!el&(psType)=(SKILL_POWER);
-  !!IF:Q1/(psPicType)/(pwr)/4^%T(trainer.power)^;
-!!el&(psType)=(SKILL_KNOWLEDGE);
-  !!IF:Q1/(psPicType)/(knl)/4^%T(trainer.knowledge)^;
-!!en;
+!!FU(trainer_GetTxtFileString):P^priskill.txt^/(psType)/?(primSkillName:z);
+!!IF:Q1/(psPicType)/(knl)/4^%(primSkillName)^;
 
 !?FU(OnCustomDialogEvent)&i^dlg_id^=(TRAINER_MAIN_DLG)/i^mouse_action^=(MOUSE_LMB_PRESSED);
 !!VR(flag:y):S(FALSE);                  [get clicked location]
@@ -1058,10 +1068,7 @@ ZVSE2
 !!VR(psType:y)&(flag)=1:Si^mouse_item^ -15; [get primary skill type]
 !!VR(psType)&(flag)=2:Si^mouse_item^ -141;
 
-!!SN&(psType)=(SKILL_ATTACK):T^trainer.attack^/?z2; [set up z var]
-!!SN&(psType)=(SKILL_DEFENSE):T^trainer.defense^/?z2;
-!!SN&(psType)=(SKILL_POWER):T^trainer.power^/?z2;
-!!SN&(psType)=(SKILL_KNOWLEDGE):T^trainer.knowledge^/?z2;
+!!FU(trainer_GetTxtFileString):P^priskill.txt^/(psType)/?z2;
 
 !!if|(psType)=(SKILL_ATTACK)/(psType)=(SKILL_DEFENSE);
   !!VR(psMin:y):S0;
@@ -1128,29 +1135,29 @@ ZVSE2
 !!VR(henchCad:y):Sx16 +228;             [get ID of henchman button]
 
 !!UN:P900/?(stackExpOn:y);              [check if stack exp enabled]
-!!DL(TRAINER_MAIN_DLG)&(stackExpOn)=(FALSE):A(swordCad)/4/0/1;
+!!DL(TRAINER_MAIN_DLG)&(stackExpOn)=(FALSE):A(swordCad)/(DLG_CMD_SET_DEF_FRAME)/0/1;
 
 !!UN:P49/?(henchOn:y);
 !!DL(TRAINER_MAIN_DLG)&(henchOn)=(FALSE):E(henchCad)/0;
 
 !!if&(mon)=(NO_MON);
-  !!DL(TRAINER_MAIN_DLG):A(monCad)/4/1/1;
+  !!DL(TRAINER_MAIN_DLG):A(monCad)/(DLG_CMD_SET_DEF_FRAME)/1/1;
 
-  !!DL(TRAINER_MAIN_DLG):A(swordCad)/4/0/1;
+  !!DL(TRAINER_MAIN_DLG):A(swordCad)/(DLG_CMD_SET_DEF_FRAME)/0/1;
   !!DL(TRAINER_MAIN_DLG):E(henchCad)/0;
 
   !!VRz30:S^^;
-  !!DL(TRAINER_MAIN_DLG):A(hintCad)/3/z30/1;
+  !!DL(TRAINER_MAIN_DLG):A(hintCad)/(DLG_CMD_SET_TEXT)/z30/1;
 
   !!DL(TRAINER_MAIN_DLG):H(monCad)/z30;
   !!DL(TRAINER_MAIN_DLG):H(hintCad)/z30;[DL:H doesn't work on ^^]
   !!DL(TRAINER_MAIN_DLG):H(swordCad)/z30;
 !!el;
   !!VR(monCadInd:y):S(mon) +2;
-  !!DL(TRAINER_MAIN_DLG):A(monCad)/4/(monCadInd)/1;
+  !!DL(TRAINER_MAIN_DLG):A(monCad)/(DLG_CMD_SET_DEF_FRAME)/(monCadInd)/1;
 
   !!VRz3:M3/(qty);
-  !!DL(TRAINER_MAIN_DLG):A(hintCad)/3/z3/1;
+  !!DL(TRAINER_MAIN_DLG):A(hintCad)/(DLG_CMD_SET_TEXT)/z3/1;
 
   !!MA:L(mon)/?(monLv:y);               [Monster level]
   !!VR(monLv):+1;                       [Add 1 to monster level]
@@ -1209,10 +1216,12 @@ ZVSE2
 !#VA(page:x);
 !!DL(TRAINER_MAIN_DLG):A3/(DLG_CMD_SET_DEF_FRAME)/(page);
 
+!!DL(TRAINER_MAIN_DLG):A3/(DLG_CMD_SET_DEF_FRAME)/(page);
+
 !!re (item:y)/83/98;
   !!FU(trainer_GetMonOfTheTable):P(page)/(item)/?(mon:y);
   !!VR(monCad:y):S(mon) +2;
-  !!DL(TRAINER_MAIN_DLG):A(item)/4/(monCad);
+  !!DL(TRAINER_MAIN_DLG):A(item)/(DLG_CMD_SET_DEF_FRAME)/(monCad);
 !!en;
 
 !?FU(trainer_GetMonOfTheTable);
@@ -1339,9 +1348,9 @@ ZVSE2
 !#VA(rank:x) (swordCad:x);
 
 !!if&(rank)>=10;
-  !!DL(TRAINER_MAIN_DLG):A(swordCad)/4/1/0; set
+  !!DL(TRAINER_MAIN_DLG):A(swordCad)/(DLG_CMD_SET_DEF_FRAME)/1/0; set
 !!el;
-  !!DL(TRAINER_MAIN_DLG):A(swordCad)/4/0/0;                    [Archer - remove sword if lower than Ace]
+  !!DL(TRAINER_MAIN_DLG):A(swordCad)/(DLG_CMD_SET_DEF_FRAME)/0/0;                    [Archer - remove sword if lower than Ace]
 !!en;
 
 !?FU(OnCustomDialogEvent)&i^dlg_id^=(TRAINER_MAIN_DLG)/i^mouse_item^=124/i^mouse_action^=(MOUSE_LMB_RELEASED); [custom monsters]
@@ -1409,7 +1418,7 @@ ZVSE2
 
 !!re (item:y)/526/540;
   !!FU(trainer_GetArtOfTheTable):P(page)/(item)/?(art:y);
-  !!DL(TRAINER_MAIN_DLG):A(item)/4/(art);
+  !!DL(TRAINER_MAIN_DLG):A(item)/(DLG_CMD_SET_DEF_FRAME)/(art);
 
   !!VR(highlight:y):S(item) -100;
 
@@ -1426,9 +1435,9 @@ ZVSE2
   !!en;
 
   !!if&(owned)>0;
-    !!DL(TRAINER_MAIN_DLG):A(highlight)/4/1/1;
+    !!DL(TRAINER_MAIN_DLG):A(highlight)/(DLG_CMD_SET_DEF_FRAME)/1/1;
   !!el;
-    !!DL(TRAINER_MAIN_DLG):A(highlight)/4/0/1;    
+    !!DL(TRAINER_MAIN_DLG):A(highlight)/(DLG_CMD_SET_DEF_FRAME)/0/1;    
   !!en;
 !!en;
 
@@ -1508,7 +1517,7 @@ ZVSE2
 
 !!if&1;
   !!HE(hero):A4/(art);                       [auto equipped]
-  !!DL(TRAINER_MAIN_DLG):Ai^mouse_item^/4/1/0;
+  !!DL(TRAINER_MAIN_DLG):Ai^mouse_item^/(DLG_CMD_SET_DEF_FRAME)/1/0;
   !!FU(trainer_PlayArtSound):P;
 !!en;
 
@@ -1632,7 +1641,7 @@ ZVSE2
 !!if&(input)<>0;
   !!VR(input):F-20000000/20000000;      [restrain value (INT_MAX)/100]
   !!VR(bonusMove:y):S(input) *100;
-  !!HE(hero):Wd(bonusMove)/1;
+  !!HE(hero):Wd(bonusMove)/0;
 !!el;
   !!HE(hero):W0/1;                      [remove all movement points if 0 was input]
 !!en;
@@ -1782,16 +1791,16 @@ ZVSE2
 
 !!if&(input)<=0;
   !!VR(monCad:y):S(slot) +100;
-  !!DL(TRAINER_MAIN_DLG):A(monCad:y)/4/1/1;                 [set transparent cadre if no mon]
+  !!DL(TRAINER_MAIN_DLG):A(monCad:y)/(DLG_CMD_SET_DEF_FRAME)/1/1;                 [set transparent cadre if no mon]
 
   !!VR(henchCad:y):S(slot) +228;
   !!DL(TRAINER_MAIN_DLG):E(henchCad)/0;
 
   !!VR(swordCad:y):S(slot) +400;
-  !!DL(TRAINER_MAIN_DLG):A(swordCad)/4/0/1;
+  !!DL(TRAINER_MAIN_DLG):A(swordCad)/(DLG_CMD_SET_DEF_FRAME)/0/1;
 
   !!VRz30:S^^;
-  !!DL(TRAINER_MAIN_DLG):A(hintCad)/3/z30/1;
+  !!DL(TRAINER_MAIN_DLG):A(hintCad)/(DLG_CMD_SET_TEXT)/z30/1;
 
   !!DL(TRAINER_MAIN_DLG):H(monCad)/z30;
   !!DL(TRAINER_MAIN_DLG):H(hintCad)/z30;[DL:H doesn't work on ^^]
@@ -1803,7 +1812,7 @@ ZVSE2
   !!HE(hero)&(input)>0:C0/(slot)/(mon)/(input)/(exp)/2; [set creatures with original exp]
   
   !!VRz3:M3/(input);
-  !!DL(TRAINER_MAIN_DLG):A(hintCad)/3/z3/1;
+  !!DL(TRAINER_MAIN_DLG):A(hintCad)/(DLG_CMD_SET_TEXT)/z3/1;
 !!en;
 
 !?FU(OnCustomDialogEvent)&i^dlg_id^=(TRAINER_MAIN_DLG)/i^mouse_action^=(MOUSE_RMB_PRESSED);
@@ -1875,39 +1884,80 @@ ZVSE2
   !!IF:M^%z3^;
 !!en;
 
-!!DO7780025/0/5/1:P(cmd);
-!!FU(trainer_RefreshCmdArt):P;          [refresh commander artifacts (global)]
-!!DO7780027/0/8/1:P(type);
-!!DL(TRAINER_CMD_DLG):A13/4/(type)/1; set correct commander to display
+!!FU(trainer_RefreshCommanderPrimSkills):P(cmd);
+!!FU(trainer_RefreshCommanderArts):P(cmd);
+!!FU(trainer_RefreshCommanders):P(type);
+
+!!DL(TRAINER_CMD_DLG):A13/(DLG_CMD_SET_DEF_FRAME)/(type)/1; set correct commander to display
 
 !!CO(cmd):X2/?(lv:y);
 !!VRi^trainer_cmdLv^:S(lv);
-!!FU(trainer_RefreshCmdLv):P(lv);
+!!FU(trainer_RefreshCommanderLv):P(lv);
 
 !!DL(TRAINER_CMD_DLG):S1;
 
-!?FU7780025;
-; x1 commander ID
-!!COx1:Sx16/?y1;
-!!VRy2:Sx16+4; got skill cadre ID
-!!DL(TRAINER_CMD_DLG)&y1<1:Ay2/4/x16/1; set cadre x16 if skill not known
-!!VRy3:Sx16+6; if skills is known
-!!DL(TRAINER_CMD_DLG)&y1>0:Ay2/4/y3/1;
-!!VRy5:Sx16+40; get dynamic bar ID
-!!VRy1&y1>5:S5; set to maximum 5th frame
-!!DL(TRAINER_CMD_DLG):Ay5/4/y1/1;
+!?FU(trainer_RefreshCommanderPrimSkills);
+!#VA(cmd:x);
 
-!?FU7780027;
-; x1 commander ID
-!!VRy1:Sx16+31; get cadre ID
-!!DL(TRAINER_CMD_DLG):Ay1/4/x16/1;
-!!DL(TRAINER_CMD_DLG)&x1=x16:Ay1/4/9/1; set blank
-!!DL(TRAINER_CMD_DLG):A13/4/x1/1;
+!!re (primSkill:y)/0/5;
+  !!CO(cmd):S(primSkill)/?(level:y);
+  ; Set primary skill icons
+  !!VR(iconCadre:y):S(primSkill) *6 +(level);
+  !!VR(iconItem:y):S(primSkill) +4;
+  !!DL(TRAINER_CMD_DLG):A(iconItem)/(DLG_CMD_SET_DEF_FRAME)/(iconCadre:y)/1;
+  ; Set primary skill level bars
+  !!VR(barCadre:y):S(level);
+  !!VR(barItem:y):S(primSkill) +40;
+  !!DL(TRAINER_CMD_DLG):A(barItem)/(DLG_CMD_SET_DEF_FRAME)/(barCadre:y)/1;
+!!en;
 
-!!VRy30:Sx1 +174;
-!!SN:H^monname^/y30/0/?z4;
+!?FU(trainer_RefreshCommanders);
+!#VA(cmd:x);
+
+!!VR(cmdCad:y):S(MON_PALADIN_A) +2;
+
+; Set up all 9 commander portraits
+!!re (item:y)/31/39;
+  !!DL(TRAINER_CMD_DLG):A(item)/(DLG_CMD_SET_DEF_FRAME)/(cmdCad)/1;
+  !!VR(cmdCad):+1;
+!!en;
+
+; Set the current one with bland cadre
+!!VR(item):S(cmd) +31;
+!!DL(TRAINER_CMD_DLG):A(item)/(DLG_CMD_SET_DEF_FRAME)/1/1/1;
+; Update the description of commander class
+!!VR(mon:y):S(cmd) +(MON_PALADIN_A);
+!!SN:H^monname^/(mon)/0/?z4;
 !!SN:T^trainer.cmdClass^/?z5/^cmd^/z4;
-!!DL(TRAINER_CMD_DLG):A59/3/z5/1;
+!!DL(TRAINER_CMD_DLG):A59/(DLG_CMD_SET_TEXT)/z5/1;
+
+; Update the big portrait of commander
+; Background
+!!if&(mon)=(MON_PALADIN_A);
+  !!VRz3:S^CRBKGCAS.pcx^;
+!!el&(mon)=(MON_HIEROPHANT_A);
+  !!VRz3:S^CRBKGRAM.pcx^;
+!!el&(mon)=(MON_TEMPLE_GUARDIAN_A);
+  !!VRz3:S^CRBKGTOW.pcx^;
+!!el&(mon)=(MON_SUCCUBUS_A);
+  !!VRz3:S^CRBKGINF.pcx^;
+!!el&(mon)=(MON_SOUL_EATER_A);
+  !!VRz3:S^CRBKGNEC.pcx^;
+!!el&(mon)=(MON_BRUTE_A);
+  !!VRz3:S^CRBKGDUN.pcx^;
+!!el&(mon)=(MON_OGRE_LEADER_A);
+  !!VRz3:S^CRBKGSTR.pcx^;
+!!el&(mon)=(MON_SHAMAN_A);
+  !!VRz3:S^CRBKGFOR.pcx^;
+!!el&(mon)=(MON_ASTRAL_SPIRIT_A);
+  !!VRz3:S^CRBKGEle.pcx^;
+!!en;
+
+!!DL(TRAINER_CMD_DLG):A1/(DLG_CMD_SET_PCX)/z3/1;
+
+; Commander Sprite
+!!VRz2:S^zm%(mon)npc.def^;
+!!DL(TRAINER_CMD_DLG):A30/(DLG_CMD_SET_DEF)/z2/1;
 
 !?FU(OnCustomDialogEvent)&i^dlg_id^=(TRAINER_CMD_DLG)/i^mouse_item^>=46/i^mouse_item^<=51/i^mouse_action^=(MOUSE_LMB_RELEASED); [increase skills]
 !!VR(ps:y):Si^mouse_item^-46; get skill ID
@@ -1917,7 +1967,7 @@ ZVSE2
 
 !!CO(cmd):S(ps)/d1; set bonus
 !!CO(cmd)&(ps)=4:S6/d1;  set magic resistance
-!!DO7780025/0/5/1:P(cmd);               [refresh]
+!!FU(trainer_RefreshCommanderPrimSkills):P(cmd);
 
 !?FU(OnCustomDialogEvent)&i^dlg_id^=(TRAINER_CMD_DLG)/i^mouse_item^>=116/i^mouse_item^<=121/i^mouse_action^=(MOUSE_LMB_RELEASED); [decrease skills]
 !!VR(ps:y):Si^mouse_item^ -116; get skill ID
@@ -1927,17 +1977,17 @@ ZVSE2
 
 !!CO(cmd):S(ps)/d-1; set bonus
 !!CO(cmd)&(ps)=4:S6/d-1;  set magic resistance
-!!DO7780025/0/5/1:P(cmd);              [refresh]
+!!FU(trainer_RefreshCommanderPrimSkills):P(cmd);
 
 ; Change commander
 !?FU(OnCustomDialogEvent)&i^dlg_id^=551/i^mouse_item^>30/i^mouse_item^<40/i^mouse_action^=(MOUSE_LMB_PRESSED);
 !!SN:W^trainer_hero^/?y1;
 !!COy1:T?y2;
 !!VRy3:Si^mouse_item^-31; get type ID
-!!DL(TRAINER_CMD_DLG):A13/4/y3/1; set new commander in item 13
-!!DL(TRAINER_CMD_DLG):Ai^mouse_item^/4/9/1;
+!!DL(TRAINER_CMD_DLG):A13/(DLG_CMD_SET_DEF_FRAME)/y3/1; set new commander in item 13
+!!DL(TRAINER_CMD_DLG):Ai^mouse_item^/(DLG_CMD_SET_DEF_FRAME)/9/1;
 !!COy1:Ty3;
-!!DO7780027/0/8/1:Py3;
+!!FU(trainer_RefreshCommanders):Py3;
 
 !!if&y2<>y3;
   !!VRz1:S^trn_quest.wav^;
@@ -1971,12 +2021,12 @@ ZVSE2
 
   !!if&1;
     !!CO(cmd):A2/(art);                 [remove art]
-    !!FU(trainer_RefreshCmdArt):P;      [refresh commander artifacts]
+    !!FU(trainer_RefreshCommanderArts):P(cmd);      [refresh commander artifacts]
     !!FU(trainer_PlayArtSound):P;
   !!en;
 !!el&(hasEmptySlot);
   !!CO(cmd):A1/(art)/0;                 [add in new art]
-  !!FU(trainer_RefreshCmdArt):P;        [refresh commander artifacts]
+  !!FU(trainer_RefreshCommanderArts):P(cmd);        [refresh commander artifacts]
   !!FU(trainer_PlayArtSound):P;
 !!en;
 
@@ -1996,33 +2046,35 @@ ZVSE2
 !!VR(victoryNew):F0/(BITS_15_MASK);     [restrain value]
 !!COi^trainer_hero^:A3/(slot)/?(art)/(victoryNew);
 
-!?FU(trainer_RefreshCmdArt);
+!?FU(trainer_RefreshCommanderArts);
+!#VA(cmd:x);
+
 !!re (highlight:y)/80/89;
-  !!DL(TRAINER_CMD_DLG):A(highlight)/4/0/1;
+  !!DL(TRAINER_CMD_DLG):A(highlight)/(DLG_CMD_SET_DEF_FRAME)/0/1;
 !!en;
 
 !!re i/0/5;
-  !!COi^trainer_hero^:A3/i/?(art:y)/?(victory:y);
+  !!CO(cmd):A3/i/?(art:y)/?(victory:y);
   !!VR(artCad:y):Si +22;
 
   !!if&(art)<=0;
     ; Switch to transparent def if no artifact is equipped
-    !!DL(TRAINER_CMD_DLG):A(artCad)/9/^trn_noArt.def^/1;
+    !!DL(TRAINER_CMD_DLG):A(artCad)/(DLG_CMD_SET_DEF)/^trn_noArt.def^/1;
   !!el;
     ; switch back to origianl def if any is equipped
-    !!DL(TRAINER_CMD_DLG):A(artCad)/9/^artifact.def^/1;    
-    !!DL(TRAINER_CMD_DLG):A(artCad)/4/(art)/1;
+    !!DL(TRAINER_CMD_DLG):A(artCad)/(DLG_CMD_SET_DEF)/^artifact.def^/1;    
+    !!DL(TRAINER_CMD_DLG):A(artCad)/(DLG_CMD_SET_DEF_FRAME)/(art)/1;
   !!en;
 
   !!VR(highlight):S(art) -66;
-  !!DL(TRAINER_CMD_DLG)&(art)>=(ART_AXE_OF_SMASHING):A(highlight)/4/1/1;
+  !!DL(TRAINER_CMD_DLG)&(art)>=(ART_AXE_OF_SMASHING):A(highlight)/(DLG_CMD_SET_DEF_FRAME)/1/1;
 !!en;
 
 ; info on right-click
 !?FU(OnCustomDialogEvent)&i^dlg_id^=(TRAINER_CMD_DLG)/i^mouse_item^>69/i^mouse_item^<80/i^mouse_action^=(MOUSE_RMB_PRESSED);
-!!VRy1:Si^mouse_item^+76; get artifact ID
-!!SN:H^art^/y1/1/?z4;
-!!IF:Q1/8/y1/4^%z4^;
+!!VR(art:y):Si^mouse_item^+76; get artifact ID
+!!SN:H^art^/(art)/1/?(artName:z);
+!!IF:Q1/(PIC_TYPE_ART)/(art)/4^%(artName)^;
 
 ; commander infos
 !?FU(OnCustomDialogEvent)&i^dlg_id^=(TRAINER_CMD_DLG)/i^mouse_item^>=31/i^mouse_item^<=39/i^mouse_action^=(MOUSE_RMB_PRESSED);
@@ -2031,42 +2083,41 @@ ZVSE2
 
 !!if&(mon)=(MON_PALADIN_A);
   !!SN:T^trainer.paladin^/?(cmdDesc:z)^cmd^/(cmd);
-  !!IF:Q1/20/68/9/37/4^%(cmdDesc)^;
+  !!IF:Q1/(PIC_TYPE_SEC_SKILL)/68/(PIC_TYPE_SPELL)/(SPELL_CURE)/4^%(cmdDesc)^;
 !!el&(mon)=(MON_HIEROPHANT_A);
   !!SN:T^trainer.hierophant^/?(cmdDesc)/^cmd^/(cmd);
-  !!IF:Q1/8/6/9/27/4^%(cmdDesc)^;
+  !!IF:Q1/(PIC_TYPE_MONSTER)/(MON_FIRST_AID_TENT)/(PIC_TYPE_SPELL)/(SPELL_SHIELD)/4^%(cmdDesc)^;
 !!el&(mon)=(MON_TEMPLE_GUARDIAN_A);
   !!SN:T^trainer.templeGuardian^/?(cmdDesc)/^cmd^/(cmd);
-  !!IF:Q1/20/29/9/44/4^%(cmdDesc)^;
+  !!IF:Q1/(PIC_TYPE_SEC_SKILL)/29/(PIC_TYPE_SPELL)/(SPELL_PRECISION)/4^%(cmdDesc)^;
 !!el&(mon)=(MON_SUCCUBUS_A);
   !!SN:T^trainer.succubus^/?(cmdDesc)/^cmd^/(cmd);
-  !!IF:Q1/9/29/4^%(cmdDesc)^;
+  !!IF:Q1/(PIC_TYPE_SPELL)/(SPELL_FIRE_SHIELD)/4^%(cmdDesc)^;
 !!el&(mon)=(MON_SOUL_EATER_A);
   !!SN:T^trainer.soulEater^/?(cmdDesc)/^cmd^/(cmd);
-  !!IF:Q1/20/41/9/39/4^%(cmdDesc)^;
+  !!IF:Q1/(PIC_TYPE_SEC_SKILL)/41/(PIC_TYPE_SPELL)/(SPELL_ANIMATE_DEAD)/4^%(cmdDesc)^;
 !!el&(mon)=(MON_BRUTE_A);
   !!SN:T^trainer.brute^/?(cmdDesc)/^cmd^/(cmd);
-  !!IF:Q1/20/44/9/43/4^%(cmdDesc)^;
+  !!IF:Q1/(PIC_TYPE_SEC_SKILL)/44/(PIC_TYPE_SPELL)/(SPELL_BLOODLUST)/4^%(cmdDesc)^;
 !!el&(mon)=(MON_OGRE_LEADER_A);
   !!SN:T^trainer.ogreLeader^/?(cmdDesc)/^cmd^/(cmd);
-  !!IF:Q1/8/4/9/46/4^%(cmdDesc)^;
+  !!IF:Q1/(PIC_TYPE_MONSTER)/(MON_BALLISTA)/(PIC_TYPE_SPELL)/(SPELL_STONE_SKIN)/4^%(cmdDesc)^;
 !!el&(mon)=(MON_SHAMAN_A);
   !!SN:T^trainer.shaman^/?(cmdDesc)/^cmd^/(cmd);
-  !!IF:Q1/20/71/9/53/4^%(cmdDesc)^;
+  !!IF:Q1/(PIC_TYPE_SEC_SKILL)/71/(PIC_TYPE_SPELL)/(SPELL_HASTE)/4^%(cmdDesc)^;
 !!el&(mon)=(MON_ASTRAL_SPIRIT_A);
   !!SN:T^trainer.astralSpirit^/?(cmdDesc)/^cmd^/(cmd);
-  !!IF:Q1/9/58/4^%(cmdDesc)^;
+  !!IF:Q1/(PIC_TYPE_SPELL)/(SPELL_COUNTERSTRIKE)/4^%(cmdDesc)^;
 !!en;
 
 !?FU(OnCustomDialogEvent)&i^dlg_id^=(TRAINER_MAIN_DLG)/i^mouse_item^=9/i^mouse_action^=(MOUSE_LMB_RELEASED); Info
-!!OW:C?y1;
-!!IF:Q1/10/y1/10/y1/1^%z177300^;        [ert - the only choice for long text?]
+!!IF:Q1/(PIC_TYPE_FLAG)/i^trainer_player^/(PIC_TYPE_FLAG)/i^trainer_player^/1^%z177300^;        [ert - the only choice for long text?]
 
 !?FU(OnCustomDialogEvent)&i^dlg_id^=(TRAINER_CMD_DLG)/i^mouse_item^=12/i^mouse_action^=(MOUSE_LMB_RELEASED);
 !!DL(TRAINER_CMD_DLG):C1;
 
-!?FU(OnCustomDialogEvent)&i^dlg_id^=(TRAINER_CMD_DLG)/i^mouse_item^=13/i^mouse_action^=(MOUSE_RMB_PRESSED);
-!!FU(trainer_ShowCmdScreen):Pi^trainer_hero^/1/1/?y1; [show commander screen]
+!?FU(OnCustomDialogEvent)&i^dlg_id^=(TRAINER_CMD_DLG)/i^mouse_item^=30/i^mouse_action^=(MOUSE_RMB_PRESSED);
+!!FU(trainer_ShowCommanderScreen):Pi^trainer_hero^/0/1/?y1;
 
 !?FU(OnCustomDialogEvent)&i^dlg_id^=(TRAINER_CMD_DLG)/i^mouse_item^>=122/i^mouse_item^<=123/i^mouse_action^=(MOUSE_LMB_PRESSED);
 !!SN:T^trainer.titleCmdLv^/?z2/^hero^/s^trainer_heroName^;
@@ -2076,9 +2127,8 @@ ZVSE2
 !!VRz1:H1;                              [check if text entered, flag 1=1 if yes]
 !!FU|-1/v1<0:E;                         [end function if empty or Esc]
 
-!!VR(lv:y):Vz1;
-!!VR(lv:y):F1/74;
-!!FU(trainer_RefreshCmdLv):P(lv);                      [refresh interface]
+!!VR(lv:y):Vz1 F1/74;
+!!FU(trainer_RefreshCommanderLv):P(lv);                      [refresh interface]
 !!VRi^trainer_cmdLv^:S(lv);
 
 !?FU(OnCustomDialogEvent)&i^dlg_id^=(TRAINER_CMD_DLG)/i^mouse_item^>=122/i^mouse_item^<=123/i^mouse_action^=(MOUSE_RMB_PRESSED);
@@ -2106,11 +2156,11 @@ ZVSE2
   !!CO(cmd):X2/i^trainer_cmdLv^;
 !!en;
 
-!?FU(trainer_RefreshCmdLv);
+!?FU(trainer_RefreshCommanderLv);
 !#VA(lv:x);
 
 !!VRz33:S^%(lv)^;
-!!DL(TRAINER_CMD_DLG):A123/3/z33/1;                   [Do not change z33!]
+!!DL(TRAINER_CMD_DLG):A123/(DLG_CMD_SET_TEXT)/z33/1;                   [Do not change z33!]
 
 !?FU318727;
 !!UN:Cx1/1/?y1 Cx2/1/y1;
@@ -2118,10 +2168,10 @@ ZVSE2
 !!VRx1:+1;
 !!VRx2:+1;
 
-!?FU(trainer_ShowCmdScreen);
+!?FU(trainer_ShowCommanderScreen);
 ; x1 - hero ID
-; x2 - type of dialogue, 0 for LMD type, 1 for RMB (doesn't work for some reasons)
-; x3 - oK button, 0 for yep, 1 for nah (doesn't work for some reasons)
+; x2 - type of dialogue, 0 for normal type, 1 for upgrade
+; x3 - Dismmiss commander button, 0 for yep, 1 for nah
 ; x4 - return value, 0 for commander alive, 1 for dead
 !!VRy1:Sv1;
 !!VRx1:*296+42344640;
