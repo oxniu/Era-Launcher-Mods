@@ -5,22 +5,15 @@ All notable changes to Trainer and Enhanced Henchmen
 ## [Unreleased] - yyyy-mm-dd - Trainer
 
 ### Added
-- New feature: Press F6 on the battlefield to activate new cheats, including Multicast and Win the Battle
-- New feature: Give Spell Book and Spell Scrolls to the hero.
+- Update commander screen - now with animated sprites and original primary skill icons
 
 ### Changed
-- Now the interface of Trainer won't get closed when the checkmark on the bottom right is clicked if the hero has been levelled up with it.
-- Now Trainer is compatible with all the plugins that add new creatures and artifacts. The last ID of Monsters and Artifacts need to be defined in FU(GetMaxMonsterId) and FU(GetMaxArtifactId) if new were added.
+- Replace strings in json with game resources
+- Update hero screen - many graphics are replaced with original resources
+- Improvement a few writings of the scripts and json
+- Other fixes and improvements
 
 ### Fixed
-- Fixed playing sound when giving commander an artifact while the commander's slots are full
-- Fixed henchmen button showing when Henchmen is disabled
-- Fixed showing wrong number of the last artifact for TUM
-- Fixed wrong images of monsters and artifacts if mods with alternative graphics are loaded.
-
-
-## [2.33] - 2021-10-12
-[Changelog of Era Laucnher Edition 2.33](http://wforum.heroes35.net/showthread.php?tid=5235&pid=129486#pid129486)
 
 ## [Unreleased] - yyyy-mm-dd - Enhanced Henchmen
 
@@ -29,6 +22,3 @@ All notable changes to Trainer and Enhanced Henchmen
 ### Changed
 
 ### Fixed
-
-## [1.1.4] - 2021-10-12
-[Changelog of Era Laucnher Edition 2.33](http://wforum.heroes35.net/showthread.php?tid=5235&pid=129486#pid129486)
