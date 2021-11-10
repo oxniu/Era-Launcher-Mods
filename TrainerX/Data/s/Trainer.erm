@@ -425,6 +425,13 @@ ZVSE2
 *!FU(trainer_SetDlgColour):P(TRAINER_MAIN_DLG)/i^trainer_player^; 
 *!SN:D;
 
+; Show guide/info/help of Trainer
+!?FU(OnCustomDialogEvent)&i^dlg_id^=(TRAINER_MAIN_DLG)/i^mouse_item^=9/i^mouse_action^=(MOUSE_LMB_RELEASED);
+!!IF:Q1/(PIC_TYPE_FLAG)/i^trainer_player^/(PIC_TYPE_FLAG)/i^trainer_player^/1^%z177300^;        [ert - the only choice for long text?]
+
+!?FU(OnKeyPressed)&i^key^=(KEY_F1)/i^trainer_dialogEnabled^;
+!!IF:Q1/(PIC_TYPE_FLAG)/i^trainer_player^/(PIC_TYPE_FLAG)/i^trainer_player^/1^%z177300^;
+
 **************************** SPELLS ************************************
 ; buttons of magic schools/right
 !?FU(OnCustomDialogEvent)&i^dlg_id^=(TRAINER_MAIN_DLG)/i^mouse_item^=14/i^mouse_action^=(MOUSE_LMB_RELEASED);
@@ -771,8 +778,6 @@ ZVSE2
       !!VRi^H3_%z10_1_Hero%(hero)^:S(FALSE);
     !!en;
   !!en;
-
-  !!SN:P^button.wav^;
 ; Shift Click - reduce skill level by 1
 !!el&i^key_ctrl^=(FALSE)/i^key_shift^/i^key_alt^=(FALSE);
   !!if|(ssLv)=(SKILL_BASIC)/(ssLv)=(SKILL_ADVANCED);
@@ -805,8 +810,6 @@ ZVSE2
       !!en;
     !!en;
   !!en;
-
-  !!SN:P^button.wav^;
 ; Alt Click - Set sec skill level to max
 !!el&i^key_ctrl^=(FALSE)/i^key_shift^=(FALSE)/i^key_alt^;
   !!VR(ssLvNew):S5;
@@ -815,8 +818,6 @@ ZVSE2
     !!VRi^H3_%z10_0_Hero%(hero)^:S(TRUE);
     !!VRi^H3_%z10_1_Hero%(hero)^:S(TRUE);
   !!en;
-
-  !!SN:P^button.wav^;
 !!el;
 ; LMB - dialogue for choosing levels of secondary skills
   !!if&i^Advanced_Classes_Mod_Active^=(FALSE);
@@ -862,6 +863,7 @@ ZVSE2
   !!en;
 !!en;
 
+!!SN&(ssLv)<>(ssLvNew):P^NwHeroLv.wav^; [play sound if skill level was updated]
 !!VR(ssLvNew):F(SKILL_NOT_LEARNED)/(SKILL_EXPERT); [fix excessive skill levels]
 !!HE(hero):S(ss)/(ssLvNew);
 !!FU(trainer_SetSecSkillCadre):P(ss)/(ssLvNew);
@@ -1005,12 +1007,21 @@ ZVSE2
 
 !?FU(OnCustomDialogEvent)&i^dlg_id^=(TRAINER_MAIN_DLG)/i^mouse_action^=(MOUSE_RMB_PRESSED); [RMB info]
 !!VR(flag:y):S(FALSE);
-!!VR(flag)&i^mouse_item^>=21/i^mouse_item^<=27:S1;
-!!VR(flag)&i^wog42_on^/i^mouse_item^=(TRAINER_MITHRIL_AREA):S2;
+
+!!if&i^mouse_item^>=21/i^mouse_item^<=27;
+  !!VR(flag):S1;
+!!el&i^wog42_on^/i^mouse_item^=(TRAINER_MITHRIL_AREA);
+  !!VR(flag):S2;
+!!en;
+
 !!FU&(flag)=(FALSE):E;
 
-!!VR(resType:y)&(flag)=1:Si^mouse_item^ -21;
-!!VR(resType)&(flag)=2:S(RES_MITHRIL);
+!!if&(flag)=1;
+  !!VR(resType:y):Si^mouse_item^ -21;
+!!el&(flag)=2;
+  !!VR(resType):S(RES_MITHRIL);
+!!en;
+
 !!FU(trainer_GetTxtFileString):P^restypes.txt^/(resType)/?(resStr:z);
 !!OW:Ri^trainer_player^/(resType)/?(resQty:y);
 !!IF:Q1/(resType)/(resQty)/4^%(resStr)^;
@@ -1025,34 +1036,32 @@ ZVSE2
 !!VRz21:S^%(level)^;
 !!DL(TRAINER_MAIN_DLG):A147/(DLG_CMD_SET_TEXT)/z21/1;    [do not change z21!]
 
+; Reset hero level, primary skills (without artifacts) and secondary skills
 !?FU(OnCustomDialogEvent)&i^dlg_id^=(TRAINER_MAIN_DLG)/i^mouse_item^=1/i^mouse_action^=(MOUSE_LMB_PRESSED);
-!!SN:W^trainer_hero^/?y3;
-!!HEy3:B0/?z3;
+!!VR(hero:y):Si^trainer_hero^;
+!!VRz3:Ss^trainer_heroName^;
+
 !!SN:T^trainer.heroLvReset^/?z2/^hero^/z3;
-!!IF:Q1/17/0/17/0/17/0/2^%z2^;
+!!IF:Q1/(PIC_TYPE_EXPERIENCE)/0/(PIC_TYPE_PRIM_SKILL_FIRST)/0/(PIC_TYPE_SEC_SKILL)/3/2^%z2^;
 !!FU&-1:E;
 
-!!HEy3:E89/1;
+!!HE(hero):E0/1;
 
-!!SN:P^trn_quest.wav^;
+!!re i/(SEC_SKILL_FIRST)/(SEC_SKILL_LAST);
+  !!HE(hero):Si/(SKILL_NOT_LEARNED);
+!!en;
 
-!!DO7780032/0/27/1:Py3;                 [forget all skills]
-!!DO7780033/55/82/1:P;                  [reset skills frames]
-!!DO7780034/168/195/1:P;                [reset cadres frames]
+!!FU(GetHeroPrimarySkillsWithoutArts):P(hero)/?(atk:y)/?(def:y)/?(pwr:y)/?(knl:y);
+!!VR(pwr):-1;
+!!VR(knl):-1;
+
+!!HE(hero):Fd-(atk)/d-(def)/d-(pwr)/d-(knl);
+
 !!FU(trainer_RefreshHeroLevel):P1;
-
+!!FU(trainer_RefreshPrimSkills):P(hero);
+!!FU(trainer_RefreshSecSkills):P(hero);
+!!SN:P^trn_quest.wav^;
 !!VRi^trainer_heroLv^:S1;               [reset hero level global var to 1]
-
-!?FU7780032;
-; x1 hero ID
-!!HEx1:Sx16/0;
-
-!?FU7780033;
-!!VRy1:Sx16 -27;
-!!DL(TRAINER_MAIN_DLG):Ax16/(DLG_CMD_SET_DEF_FRAME)/y1/1;
-
-!?FU7780034;
-!!DL(TRAINER_MAIN_DLG):Ax16/(DLG_CMD_SET_DEF_FRAME)/0/1;
 
 ; set hero level by entering number
 !?FU(OnCustomDialogEvent)&i^dlg_id^=(TRAINER_MAIN_DLG)/i^mouse_item^=147/i^mouse_action^=(MOUSE_LMB_PRESSED);
@@ -2389,12 +2398,11 @@ ZVSE2
   !!IF:Q1/(PIC_TYPE_SPELL)/(SPELL_COUNTERSTRIKE)/4^%(cmdDesc)^;
 !!en;
 
-!?FU(OnCustomDialogEvent)&i^dlg_id^=(TRAINER_MAIN_DLG)/i^mouse_item^=9/i^mouse_action^=(MOUSE_LMB_RELEASED); Info
-!!IF:Q1/(PIC_TYPE_FLAG)/i^trainer_player^/(PIC_TYPE_FLAG)/i^trainer_player^/1^%z177300^;        [ert - the only choice for long text?]
-
+; Close the commander dialogue
 !?FU(OnCustomDialogEvent)&i^dlg_id^=(TRAINER_CMD_DLG)/i^mouse_item^=12/i^mouse_action^=(MOUSE_LMB_RELEASED);
 !!DL(TRAINER_CMD_DLG):C1;
 
+; Show commander dialogue
 !?FU(OnCustomDialogEvent)&i^dlg_id^=(TRAINER_CMD_DLG)/i^mouse_item^=28/i^mouse_action^=(MOUSE_RMB_PRESSED);
 !!FU(trainer_ShowCommanderScreen):Pi^trainer_hero^/0/1/?y1;
 
