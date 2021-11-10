@@ -36,8 +36,7 @@ ZVSE2
   !!IF:L^%T(trainer.objOff)^;
   !!SN:W^trainer_objScannerOn^/0;
 !!el;
-  !!VR(sound:z):S^Military.wav^;
-  !!SN:P(sound);
+  !!SN:P^Military.wav^;
   !!IF:L^%T(trainer.objOn)^;
   !!SN:W^trainer_objScannerOn^/1;
 !!en;
@@ -149,8 +148,7 @@ ZVSE2
   !!en;
 
   !!UN|(obj)=(OBJ_TOWN)/(obj)=(OBJ_HERO):R1; [refresh if deleted object was hero or town]
-  !!VR(sound:z):S^killfade.wav^;
-  !!SN:P(sound);
+  !!SN:P^killfade.wav^;
 !!en;
 
 !!if&i^trainer_objChoice^=4;            [place obstacles]
@@ -158,22 +156,19 @@ ZVSE2
 
   *!TR(x)/(y)/(z):T?(land:y)/?(landSub:y)/?(river:y)/?(riverSub:y)/?(road:y)/?(roadSub:y)/?(mirror:y)/?(accessability:y); [no need to differentiate water and land...]
   !!UN:I(x)/(y)/(z)/i^trainer_obstacleType^/i^trainer_obstacleSubtype^;
-  !!VR(sound):S^telptin.wav^;
-  !!SN:P(sound);
+  !!SN:P^telptin.wav^;
 !!en;
 
 !!if&i^trainer_objChoice^=5/(obj)=(OBJ_EVENT); [disable event for current human player]
   !!OW:C?(currPlayer:y);
   !!LE(x)/(y)/(z):D(currPlayer)/1;      [LE:D get syntax doesn't work, damn]
-  !!VR(sound):S^trn_quest.wav^;
-  !!SN:P(sound);
+  !!SN:P^trn_quest.wav^;
 !!en;
 
 !!if&i^trainer_objChoice^=6/(obj)=(OBJ_EVENT); [disable event for current human player]
   !!OW:C?(currPlayer:y);
   !!LE(x)/(y)/(z):D(currPlayer)/0;      [LE:D get syntax doesn't work, damn]
-  !!VR(sound):S^trn_quest.wav^;
-  !!SN:P(sound);
+  !!SN:P^trn_quest.wav^;
 !!en;
 
 !!if&i^trainer_objChoice^=7/(obj)=(OBJ_TOWN);
@@ -400,8 +395,7 @@ ZVSE2
   !!VRi^eighth_8thDwell_%(townId)^:S(FALSE);
 !!en;
 
-!!VR(sound:z):S^BUILDTWN.wav^;
-!!SN:P(sound);
+!!SN:P^BUILDTWN.wav^;
 
 ; is it allowed in principle to build this building in the city?            [igrik]
 !?FU(trainer_checkBuildingEligibility);
@@ -495,7 +489,7 @@ The game may fall at any time.^;
 !!if&(hourglassOn);
   !!SN:H^art^/(ART_HOURGLASS_OF_THE_EVIL_HOUR)/0/z106002; [restore names with ert if Asmodeus is enabled]
 !!el;
-  !!UN:A(ART_HOURGLASS_OF_THE_EVIL_HOUR)/9/0;
+  !!SN:H^-art^/(ART_HOURGLASS_OF_THE_EVIL_HOUR)/0/^^;
 !!en;
 
 ; re-open the dialog with updated pictures
@@ -507,8 +501,7 @@ The game may fall at any time.^;
   !!IF:L^%T(trainer.addCoordOff)^;
   !!VRi^trainer_coord_on^:S(FALSE);
 !!el;
-  !!VR(sound:z):S^Military.wav^;
-  !!SN:P(sound);
+  !!SN:P^Military.wav^;
   !!IF:L^%T(trainer.addCoordOn)^;
   !!VRi^trainer_coord_on^:S(TRUE);
 !!en;
@@ -528,8 +521,7 @@ The game may fall at any time.^;
   !!VRi^trainer_builder_on^:S(FALSE);
   !!CD:D4 M55;
 !!el;
-  !!VR(sound:z):S^Military.wav^;
-  !!SN:P(sound);
+  !!SN:P^Military.wav^;
   !!IF:L^%T(trainer.addBuilderOn)^;
   !!VRi^trainer_builder_on^:S(TRUE);
   !!CD:D(INT_MAX) M0;
@@ -712,8 +704,7 @@ The game may fall at any time.^;
   !!IF:L^%T(trainer.addCastOff)^;
   !!VRi^trainer_cast_on^:S(FALSE);
 !!el;
-  !!VR(sound:z):S^Military.wav^;
-  !!SN:P(sound);
+  !!SN:P^Military.wav^;
   !!IF:L^%T(trainer.addCastOn)^;
   !!VRi^trainer_cast_on^:S(TRUE);
 !!en;
