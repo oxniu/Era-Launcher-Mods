@@ -812,9 +812,12 @@ ZVSE2
   !!en;
 ; Alt Click - Set sec skill level to max
 !!el&i^key_ctrl^=(FALSE)/i^key_shift^=(FALSE)/i^key_alt^;
-  !!VR(ssLvNew):S5;
+  !!if&i^Advanced_Classes_Mod_Active^=(FALSE);
+    !!VR(ssLvNew):S(SKILL_EXPERT);
+  !!en;
 
   !!if&i^Advanced_Classes_Mod_Active^;
+    !!VR(ssLvNew):S5;
     !!VRi^H3_%z10_0_Hero%(hero)^:S(TRUE);
     !!VRi^H3_%z10_1_Hero%(hero)^:S(TRUE);
   !!en;
