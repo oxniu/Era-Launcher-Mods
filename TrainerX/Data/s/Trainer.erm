@@ -1720,6 +1720,9 @@ ZVSE2
   !!DL(TRAINER_MAIN_DLG):Ai^mouse_item^/(DLG_CMD_SET_DEF_FRAME)/1/0;
   !!FU(trainer_PlayArtSound):P;
   !!FU(trainer_RefreshPrimSkills):P(hero); [refresh hero's primary skills as they might be changed]
+  ; Check if Enhanced Commander Artifact is enabled. Refresh sec skills if positive
+  !!UN:P219/?(enhnCmdArtOn:y);
+  !!FU(trainer_RefreshSecSkills)&(enhnCmdArtOn)/(art)>=(ART_AXE_OF_SMASHING)/(art)<=(ART_SLAVAS_RING_OF_POWER):P(hero);
 !!en;
 
 ; Right-click to get the info of the artifact
@@ -1731,7 +1734,6 @@ ZVSE2
 
 !?FU(trainer_PlayArtSound);
 !!VR(randNum:y):S1 R6;
-
 !!SN:P^pickup0%(randNum).wav^;
 
 !?FU(OnCustomDialogEvent)&i^dlg_id^=(TRAINER_MAIN_DLG)/i^mouse_item^=125/i^mouse_action^=(MOUSE_LMB_RELEASED); [custom artifacts]
@@ -1821,6 +1823,9 @@ ZVSE2
 !!FU(trainer_PlayArtSound):P;
 
 !!FU(trainer_RefreshPrimSkills):Pi^trainer_hero^; [refresh hero's primary skills as they might be changed]
+; Check if Enhanced Commander Artifact is enabled. Refresh sec skills if positive
+!!UN:P219/?(enhnCmdArtOn:y);
+!!FU(trainer_RefreshSecSkills)&(enhnCmdArtOn)/(art)>=(ART_AXE_OF_SMASHING)/(art)<=(ART_SLAVAS_RING_OF_POWER):P(hero);
 
 ***************************** End artifacts ********************************
 
