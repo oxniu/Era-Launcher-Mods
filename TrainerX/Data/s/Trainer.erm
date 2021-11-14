@@ -1195,7 +1195,8 @@ ZVSE2
 
 !!FU(trainer_GetTxtFileString):P^priskill.txt^/(psType)/?(primSkillName:z);
 !!SN:T^trainer.basicPs^/?(basicPs:z)/^hero^/s^trainer_heroName^/^ps^/(primSkillName);
-!!IF:Q1/34/(psValue)/4^%(basicPs)^;
+!!VR(psPicType:y):S(psType) +31;
+!!IF:Q1/(psPicType)/(psValue)/4^%(basicPs)^;
 
 !?FU(OnCustomDialogEvent)&i^dlg_id^=(TRAINER_MAIN_DLG)/i^mouse_action^=(MOUSE_LMB_PRESSED);
 !!VR(flag:y):S(FALSE);                  [get clicked location]
