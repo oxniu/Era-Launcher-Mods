@@ -130,7 +130,7 @@ ZVSE2
 !!en;
 
 !!if&i^trainer_objChoice^=3;            [delete object]
-  !!FU|(obj)=(OBJ_STUB)/(obj)=(OBJ_ANCHOR_POINT):E;
+  !!FU|(obj)=(OBJ_STUB)/(obj)=(OBJ_ANCHOR_POINT)/(obj)=(OBJ_EVENT):E;
 
   !!CA(x)/(y)/(z)&(obj)=(OBJ_TOWN):O(NO_OWNER);
   !!UN&(obj)<>(OBJ_HERO)/(obj)<>(OBJ_OBELISK):O(x)/(y)/(z); [delete objects except for hero and obelisk]
@@ -349,11 +349,12 @@ ZVSE2
 !!SN:P(sound);
 
 !?FU(trainer_ObjScannerBuildings);
-!#VA(x:x) (y:x) (z:x) (isBuildAll:x);
+!#VA(x:x) (y:x) (z:x);
+!#VA(isBuild:x);                        [Boolean. If True, build all building for the targeted town. Otherwise demolish all]
 
 !!CA(x)/(y)/(z):U?(townId:y) T?(townType:y);
 
-!!FU(trainer_checkBuildingEligibility)|(townType)=(TOWN_CASTLE)/(townType)=(TOWN_NECROPOLIS)/(townType)=(TOWN_FORTRESS)/(townType)=(TOWN_CONFLUX):P(townId)/6/?(result:y);
+!!FU(trainer_CheckBuildingEligibility)|(townType)=(TOWN_CASTLE)/(townType)=(TOWN_NECROPOLIS)/(townType)=(TOWN_FORTRESS)/(townType)=(TOWN_CONFLUX):P(townId)/6/?(canBuildShipyard:y);
 
 !!re i/0/43;
   !!VR(flag:y):S(TRUE);
@@ -363,60 +364,63 @@ ZVSE2
     !!VR(flag)&(townType)>=(TOWN_STRONGHOLD)/(townType)<=(TOWN_FORTRESS)|(townType)=(TOWN_CASTLE):S(FALSE);
   !!en;
 
-  !!VR(flag)&i=6/(isBuildAll)/(result)=(FALSE):S(FALSE); [shipyard]
+  !!if&(canBuildShipyard)=(FALSE);
+    !!VR(flag)&i=6:S(FALSE); [Shipyard]
+    !!VR(flag)&i=17/(townType)=(TOWN_CASTLE):S(FALSE); [Lighthouse]
+  !!en;
+
+  !!VR(flag)&i=20:S(FALSE);             [void]
   !!VR(flag)&i=22/(townType)=(TOWN_CONFLUX):S(FALSE);
   !!VR(flag)&i=23/(townType)<=(TOWN_RAMPART)/(townType)>=(TOWN_FORTRESS):S(FALSE);
-  !!VR(flag)&i=23/(townType)=(TOWN_NECROPOLIS):S(FALSE); [second horde building]
-  !!VR(flag)&i>=24/i<=25/(townType)<>(TOWN_RAMPART)/(townType)<>(TOWN_INFERNO):S(FALSE); [upgraded second horde building]
+  !!VR(flag)&i=23/(townType)=(TOWN_NECROPOLIS):S(FALSE); [Second horde building]
+  !!VR(flag)&i>=24/i<=25/(townType)<>(TOWN_RAMPART)/(townType)<>(TOWN_INFERNO):S(FALSE); [Upgraded second horde building]
   !!VR(flag)&i>=27/i<=29:S(FALSE);
   !!co&(flag)=(FALSE);
 
-  !!CA0/(townId)&(isBuildAll):B6/i;
-  !!CA0/(townId)&(isBuildAll)=(FALSE)/i<>10:B2/i;
+  !!CA0/(townId)&(isBuild):B6/i;
+  !!CA0/(townId)&(isBuild)<>(TRUE):B2/i;
 !!en;
 
-!!CA0/(townId)&(isBuildAll)=(FALSE):B6/10;[make sure the town has village hall even if demolishing]
-!!CA0/(townId):I0;                     [refresh how the town looks on the map]
+!!CA0/(townId)&(isBuild)=(FALSE):B6/10; [Make sure the town has village hall even if demolishing]
+!!CA0/(townId):I0;                      [Update how the town looks on the map]
 
 ; build Third Upgrade Building
-!!VRi^tum_upgGuild_%(townId)^&i^Typhon_Third_Upgrade_Mod_Active^:S(isBuildAll);
+!!VRi^tum_upgGuild_%(townId)^&i^Typhon_Third_Upgrade_Mod_Active^:S(isBuild);
 
-!!if&i^eighth_on^/(isBuildAll)/i^eighth_8thDwell_%(townId)^=(FALSE); [Eighth Dwelling]
+!!if&i^eighth_on^/(isBuild)/i^eighth_8thDwell_%(townId)^=(FALSE); [Eighth Dwelling]
   !!FU(eighth_Get8thMon):P(townType)/(TRUE)/?(eighthMon:y)/?(nonUpgMon:y);
   !!FU(eighth_Get8thBasicGrowth):P(townType)/?(basicGrowth:y);
   !!FU(eighth_SetOrGet8thMon):P(townId)/(eighthMon)/(basicGrowth)/0;
   !!VRi^eighth_8thDwell_%(townId)^:S(TRUE);
-!!el&i^eighth_on^/(isBuildAll)/i^eighth_8thDwell_%(townId)^; [upgrade 8th dwelling ]
+!!el&i^eighth_on^/(isBuild)/i^eighth_8thDwell_%(townId)^; [upgrade 8th dwelling ]
   !!FU(eighth_SetOrGet8thMon):P(townId)/?(eighthMon)/?(qty:y)/1; [get available quantity]
   !!FU(eighth_Get8thMon):P(townType)/(TRUE)/?(eighthMon)/?(nonUpgMon);
   !!FU(eighth_SetOrGet8thMon):P(townId)/(eighthMon)/(qty);
-!!el&i^eighth_on^/(isBuildAll)=(FALSE)/i^eighth_8thDwell_%(townId)^=(TRUE); [demolish]
+!!el&i^eighth_on^/(isBuild)=(FALSE)/i^eighth_8thDwell_%(townId)^=(TRUE); [demolish]
   !!FU(eighth_SetOrGet8thMon):P(townId)/(NO_MON)/-1/0;
   !!VRi^eighth_8thDwell_%(townId)^:S(FALSE);
 !!en;
 
 !!SN:P^BUILDTWN.wav^;
 
-; is it allowed in principle to build this building in the city?            [igrik]
-!?FU(trainer_checkBuildingEligibility);
-; x1 - town number on map (0...47)
-; x2 - building id
-; x3 - return: bool (0-no, 1-yes)
-!#VA(townId:x) (building:x) (result:x);
+; Is it allowed in principle to build this building in the city?            [by igrik]
+!?FU(trainer_CheckBuildingEligibility);
+!#VA(townId:x);                         [town number on map (0...47)]
+!#VA(building:x);                       [building id]
+!#VA(result:x);                         [return: bool (0-no, 1-yes)]
 
+!!VR(result):S(FALSE);   
 !!FU(Town_GetStruct):P(townId)/?(ptr:y);
 !!CA0/(townId):R?(isbuilt:y) R(FALSE);
 !!SN:E6033696/2/(ptr)/(building);
-!!VR(result):S(FALSE);    
 !!VR(result)&v1<>(FALSE):S(TRUE);
 !!CA0/(townId):R(isbuilt);
 
-; getting city structure
+; Get city structure
 !?FU(trainer_GetStruct);
-; x1 - town number on map (0...47)
-; x2 - return: ptr structure town
-!#VA(townId:x) (ptr:x);
-
+!#VA(townId:x);                         [Town number on map (0...47)]
+!#VA(ptr:x);                            [Return: ptr structure town]
+ 
 !!IF&(townId)<=(NO_TOWN)|(townId)>47:M^Wrong town id.^;
 !!UN:C6919480/4/?(value:y); 
 !!VR(value):+136724;
