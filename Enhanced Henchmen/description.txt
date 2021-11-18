@@ -1,7 +1,6 @@
 Enhanced Henchmen
 
 Author: Archer30
-(based on work by igrik)
 
 A mod that allows you to change the balance of your Henchmen script.
 
