@@ -12,4 +12,6 @@ ZVSE2
 !#DC(TRAINER_LEVEL_CAP_EXTREME)      = 6424;
 
 !#DC(TRAINER_OBJ_OPT_NONE)           = 9; [last option of object scanner]
+
+!#DC(CUSBATT_MAIN_DLG)               = 448;
 ; ========= END CONSTANTS =========

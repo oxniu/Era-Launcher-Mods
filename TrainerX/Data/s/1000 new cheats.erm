@@ -2,7 +2,7 @@ ZVSE2
 ; Author:   Archer30
 ; Special thanks to Valery and daemon_n
 ; Engine:   ERM 2.0+
-; Requires: ERA 3.4+, Era Erm Framework
+; Requires: ERA 3.9+, Era Erm Framework
 
 ; Cheats activated by F3 and F6
 
@@ -641,22 +641,22 @@ The game may fall at any time.^;
 
 !!FU(Array_EnsureMinSize):P(arrayId)/3/1;
 
-!!UN:C6919480/4/?(add:y);
+!!UN:C6919480/4/?(address:y);
 
-!!VR(addMonth:y):S(add) +128578;        [Month]
+!!VR(addressMonth:y):S(address) +128578;        [Month]
 !!SN:M(arrayId)/0/?(month:y);
 !!VR(month):F1/(INT_MAX);
-!!UN:C(addMonth)/2/(month);
+!!UN:C(addressMonth)/(UNC_INT16)/(month);
 
-!!VR(addWeek:y):S(add) +128576;         [Week (1...4)]
+!!VR(addressWeek:y):S(address) +128576;         [Week (1...4)]
 !!SN:M(arrayId)/1/?(week:y);
 !!VR(week):F1/4;
-!!UN:C(addWeek)/2/(week);
+!!UN:C(addressWeek)/(UNC_INT16)/(week);
 
-!!VR(addWeekday:y):S(add) +128574;      [Weekday  (1...7)]
+!!VR(addressWeekday:y):S(address) +128574;      [Weekday  (1...7)]
 !!SN:M(arrayId)/2/?(weekday:y);
 !!VR(weekday):F1/7;
-!!UN:C(addWeekday)/2/(weekday);
+!!UN:C(addressWeekday)/(UNC_INT16)/(weekday);
 
 !!UN:R2;
 

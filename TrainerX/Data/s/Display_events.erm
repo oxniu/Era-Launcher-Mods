@@ -9,10 +9,11 @@ ZVSE2
 !?FU78006990;
 !!UN:Ux1/-1/-1/1; event in v1/v2/v3
 !!UN:Iv1/v2/v3/63/64;
+!!TRv1/v2/v3:P1; make passable debug
 
 !?FU(OnGameEnter);
 ;display events @gamecreator
-!!SN:L^EraPlugins\erm_hooker.era^/?y1 Ay1/^SetHook^/?y2;
+!!SN:L^erm_hooker.era^/?y1 Ay1/^SetHook^/?y2;
 
 !!if&y2<>0;
   !!SN:Ey2/1/7658344/1073848320; enable OB26 trigger
@@ -132,6 +133,6 @@ ZVSE2
 !!VRy6:+4; next render unprocessed
 !!SN:G12; loop end
 
-!$OB26&1000;
+!$OB(OBJ_EVENT)&1000;
 !!FU78007010:P63/64/?v5;
 !!FU78007020:Pv5/v998/v999/v1000;
