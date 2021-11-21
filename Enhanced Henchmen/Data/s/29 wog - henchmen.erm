@@ -832,15 +832,17 @@ ZVSE2
 
 !!VR(result):S(FALSE);
 !!SN:L^amethyst2_4.dll^/?(amethyst:y);
-!!SN:A(amethyst)/^_hasSantaGuards^/?(func:y);
 
-!!if|(amethyst)=0/(func)=0:;
-  !!VR(result)&(mon)=(MON_SANTA_GREMLIN):S1;
-  !!FU:E;
+!!if&(amethyst)<>0;
+  !!SN:A(amethyst)/^_hasSantaGuards^/?(func:y);
+
+  !!if&(amethyst)<>0/(func)<>0;
+    !!SN:E(func)/(mon);
+    !!VR(result):Sv1;
+  !!el;
+    !!VR(result)&(mon)=(MON_SANTA_GREMLIN):S1;
+  !!en;
 !!en;
-
-!!SN:E(func)/(mon);
-!!VR(result):Sv1;
 
 !?FU(hench_ManageExtraSpells);
 !#VA(side:x) (stack:x);
