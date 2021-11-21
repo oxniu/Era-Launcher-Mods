@@ -1,6 +1,6 @@
 ZVSE2
 ; Author:   Valery, renewed by Archer30
-; Special thanks to Jim Vogan and Hawaiing
+; Special thanks to Jim Vogan, Hawaiing, MoP, igrik and Algor
 ; Engine:   ERM 2.0+
 ; Requires: ERA 3.9+, Era Erm Framework
 
@@ -383,10 +383,10 @@ ZVSE2
 
 ; Show guide/info/help of Trainer
 !?FU(OnCustomDialogEvent)&i^dlg_id^=(TRAINER_MAIN_DLG)/i^mouse_item^=9/i^mouse_action^=(MOUSE_LMB_RELEASED);
-!!IF:Q1/(PIC_TYPE_FLAG)/i^trainer_player^/(PIC_TYPE_FLAG)/i^trainer_player^/1^%z177300^;        [ert - the only choice for long text?]
+!!IF:Q1/(PIC_TYPE_FLAG)/i^trainer_player^/(PIC_TYPE_FLAG)/i^trainer_player^/1^%T(trainer.help)^;
 
 !?FU(OnKeyPressed)&i^key^=(KEY_F1)/i^trainer_dialogEnabled^;
-!!IF:Q1/(PIC_TYPE_FLAG)/i^trainer_player^/(PIC_TYPE_FLAG)/i^trainer_player^/1^%z177300^;
+!!IF:Q1/(PIC_TYPE_FLAG)/i^trainer_player^/(PIC_TYPE_FLAG)/i^trainer_player^/1^%T(trainer.help)^;
 
 **************************** SPELLS ************************************
 ; Dynamic spell panel depedning on the schools of spells in mods
