@@ -10,11 +10,11 @@ ZVSE2
 !?FU(OnAfterErmInstructions);
 !!FU(trainer_CheckWoGScripts):P;
 !!FU(trainer_GetFirstHumanPlayer):P?(player:y);
-!!VRi^trainer_objChoice^:S0;            [default option - the first option]
+!!VRi^trainer_objChoice^:S0;            [Default option - the first option]
 !!VRi^trainer_ownerChoice^:S(player);
 
 !?FU(trainer_CheckWoGScripts);
-!!UN:P36/?i^mithril_on^;                  [check mithril enhancement]
+!!UN:P36/?i^mithril_on^;                [Check mithril enhancement]
 
 !?FU(trainer_GetFirstHumanPlayer);
 !#VA(player:x);
@@ -79,7 +79,9 @@ ZVSE2
 !!en;
 
 !?FU(trainer_SelectHeroByPlayer);
-!#VA(player:x) (isOSMain:x) (isOSTelpt:x);[x2 - mode for Object Scanner main, x3 - mode for Object Scanner teleportation]
+!#VA(player:x);
+!#VA(isOSMain:x);                       [mode for Object Scanner main]
+!#VA(isOSTelpt:x);                      [mode for Object Scanner teleportation]
 
 !!OW:A(player)/?(hero:y);         [check active hero of the player]
 
@@ -111,15 +113,17 @@ ZVSE2
   !!en;
 !!en;
 
+; Show Trainer main dialogue
 !?FU(trainer_MainDialog);
-!!VR(hero:y):Si^trainer_hero^;          [set trainer hero number]
-!!HE(hero):B0/?z1;                      [export name to z1]
-!!VRs^trainer_heroName^:Sz1;            [set trainer hero string]
-!!HE(hero):O?i^trainer_player^;         [set trainer player number]
-!!FU(trainer_GetPlayerStr):Pi^trainer_player^; [set trainer player string]
+!!VR(hero:y):Si^trainer_hero^;          [Set trainer hero number]
+!!HE(hero):B0/?z1;                      [Export name to z1 - z dependency hasn't been removed]
+!!VRs^trainer_heroName^:Sz1;            [Set trainer hero string]
+!!HE(hero):O?i^trainer_player^;         [Set trainer player number]
+!!FU(trainer_GetPlayerStr):Pi^trainer_player^; [Set trainer player string]
+!!VRi^trainer_spellBookAsked^:S(FALSE); [Initialise the variable of asking whether the hero wants to have a spell book on learning spells]
 !!FU(trainer_GetPrimSkillCap):P;               [check if prima.dll is enabled]
 
-; Set the page of tables
+; Set the pages of tables
 !!VRi^trainer_monTablePage^:S(TOWN_CASTLE);
 !!VRi^trainer_artTablePage^:S0;
 !!VRi^trainer_spellTablePage^:S0;
@@ -317,7 +321,7 @@ ZVSE2
   !!FU(trainer_RefreshDlgsOnLevelUp):P(hero);
 !!el;
   !!DL(TRAINER_MAIN_DLG):C1;
-  !!HE(hero):E?(exp)/(lvNew);
+  !!HE(hero):E?(exp)/(lvNew);           [set new level without leveling up process]
 
   !!VRi^trainer_dialogEnabled^:S(FALSE);[flag for trainer interface]
 !!en;
@@ -384,7 +388,7 @@ ZVSE2
 !!IF:Q1/(PIC_TYPE_FLAG)/i^trainer_player^/(PIC_TYPE_FLAG)/i^trainer_player^/1^%z177300^;
 
 **************************** SPELLS ************************************
-
+; Dynamic spell panel depedning on the schools of spells in mods
 !?FU(trainer_CreateSpellArrays);
 !!FU(NewIntArray):P?i^trainer_airSpells^/(M_TEMP) P?i^trainer_fireSpells^/(M_TEMP) P?i^trainer_waterSpells^/(M_TEMP) P?i^trainer_earthSpells^/(M_TEMP);
 
@@ -405,7 +409,6 @@ ZVSE2
 !!en;
 
 ; Make sure the size of arrays are 18
-!!FU(Array_Push):Pi^trainer_airSpells^/(SPELL_TITANS_LIGHTNING_BOLT); [Add in Titan's Lightning Bolt at the end of the Air Spell array]
 !!FU(trainer_EnsureArraySizes):Pi^trainer_airSpells^/0;
 !!FU(trainer_EnsureArraySizes):Pi^trainer_fireSpells^/1;
 !!FU(trainer_EnsureArraySizes):Pi^trainer_waterSpells^/0;
@@ -415,14 +418,17 @@ ZVSE2
 !#VA(array:x) (offset:x);
 
 !!SN:M(array)/?(size:y);
-!!VR(gap:y):S18 -(size);
+!!VR(missingSpells:y):S(TRAINER_SPELL_PER_PAGE) -(size);
 
 ; Add in Magic Arrow and Visions if the school is not full
-!!if&(gap)>0;
-  !!re (index:y)/0/(gap)/1/-1;
-    !!VR(spellIndex:y):S(index) +(offset) %2;
+!!if&(missingSpells)>0;
+  !!re i/0/(missingSpells)/1/-1;
+    !!VR(fillingSpell:y):Si +(offset) %2;
+    !!VR(currMissing:y):S(missingSpells) -i;
 
-    !!if&(spellIndex)=0;
+    !!if&(array)=i^trainer_airSpells^/(currMissing)=1; [Add in Titan's Lightning Bolt at the end of the Air Spell array]
+      !!FU(Array_Push):P(array)/(SPELL_TITANS_LIGHTNING_BOLT);
+    !!el&(fillingSpell)=0;
       !!FU(Array_Push):P(array)/(SPELL_MAGIC_ARROW);
     !!el;
       !!FU(Array_Push):P(array)/(SPELL_VISIONS);
@@ -430,7 +436,7 @@ ZVSE2
   !!en;
 ; Remove excessive items if there is
 !!el;
-  !!FU(Array_Resize):P(array)/18;
+  !!FU(Array_Resize):P(array)/(TRAINER_SPELL_PER_PAGE);
 !!en;
 
 ; Refresh the table of spells
@@ -490,7 +496,7 @@ ZVSE2
 
 !!FU(trainer_RefreshSpellTable):Pi^trainer_spellTablePage^/i^trainer_hero^;
 
-; Learn and unlearn a spell by left-clicking
+; Learn and forget a spell by left-clicking
 !?FU(OnCustomDialogEvent)&i^dlg_id^=(TRAINER_MAIN_DLG)/i^mouse_item^>=196/i^mouse_item^<=213/i^mouse_action^=(MOUSE_LMB_PRESSED);
 !!VR(hero:y):Si^trainer_hero^;
 !!VR(page:y):Si^trainer_spellTablePage^;
@@ -509,15 +515,66 @@ ZVSE2
 !!SN:M(spellArray)/(index)/?(spell:y);
 !!HE(hero):M=(spell)/1;
 
+; Forget the selected spell if learned, otherwise learn it
 !!if&1;
   !!HE(hero):M(spell)/(FALSE);
   !!DL(TRAINER_MAIN_DLG):Ai^mouse_item^/(DLG_CMD_SET_DEF_FRAME)/(FALSE)/1;
+  !!FU(trainer_UpdateSpellBook):P(hero);
 !!el;
+  ; Art to give the hero a spell book when adding a spell. Don't show again if ingored.
+  !!if&i^trainer_spellBookAsked^<>(TRUE);
+    !!HE(hero):A2/(ART_SPELL_BOOK)/?(owned:y)/?(equipped:y);
+
+    !!if&(owned)<=0;
+      !!SN:H^art^/(ART_SPELL_BOOK)/0/?(spellBookName:z) T^trainer.heroArt^/?(heroArtStr:z)/^art^/(spellBookName)/^hero^/s^trainer_heroName^;
+      !!IF:Q1/(PIC_TYPE_ART)/(ART_SPELL_BOOK)/(MSG_TYPE_QUESTION)^%(heroArtStr)^;
+
+      !!if&1;
+        !!HE(hero):A4/(ART_SPELL_BOOK);
+        !!FU(trainer_RefreshArtTable)&i^trainer_artTablePage^=10:P10/(hero);
+      !!el;
+        !!VRi^trainer_spellBookAsked^:S(TRUE);
+      !!en;
+    !!en;
+  !!en;
+
   !!HE(hero):M(spell)/(TRUE);
   !!DL(TRAINER_MAIN_DLG):Ai^mouse_item^/(DLG_CMD_SET_DEF_FRAME)/(TRUE)/1;
 !!en;
 
 !!SN:P^button.wav^;
+
+; Learn and forget all the spells
+!?FU(OnCustomDialogEvent)&i^dlg_id^=(TRAINER_MAIN_DLG)/i^mouse_item^>=109/i^mouse_item^<=110/i^mouse_action^=(MOUSE_LMB_RELEASED);
+!!VR(hero:y):Si^trainer_hero^;
+!!VR(isLearning:y):S(FALSE);
+!!VR(isLearning)&i^mouse_item^=109:S(TRUE);
+
+!!if&(isLearning);
+  !!SN:T^trainer.learnAllSp^/?(dlgStr:z)/^hero^/s^trainer_heroName^;
+  !!IF:Q1/(PIC_TYPE_ART)/(ART_SPELL_BOOK)/(MSG_TYPE_QUESTION)/^%(dlgStr)^;
+!!el;
+  !!SN:T^trainer.forgetAllSp^/?(dlgStr:z)/^hero^/s^trainer_heroName^;
+  !!IF:Q1/(PIC_TYPE_SPELL)/(SPELL_FORGETFULNESS)/(MSG_TYPE_QUESTION)/^%(dlgStr)^;
+!!en;
+
+!!if&1;
+  !!re i/(SPELL_FIRST)/(SPELL_LAST_WOG);
+    !!if&(isLearning);
+      !!HE(hero)&i<>(SPELL_TITANS_LIGHTNING_BOLT):Mi/(TRUE);
+
+      !!HE(hero):A2/(ART_SPELL_BOOK)/?(owned:y)/?(equipped:y);
+      !!HE(hero)&(owned)<=0:A4/(ART_SPELL_BOOK);
+    !!el;
+      !!HE(hero):Mi/(FALSE);
+      !!FU(trainer_UpdateSpellBook):P(hero);
+    !!en;
+  !!en;
+
+  !!FU(trainer_RefreshSpellTable):Pi^trainer_spellTablePage^/(hero);
+  !!FU(trainer_RefreshArtTable)&i^trainer_artTablePage^=10:P10/(hero);
+  !!SN:P^openbook.wav^;
+!!en;
 
 ; Show spells names by right-clicking
 !?FU(OnCustomDialogEvent)&i^dlg_id^=(TRAINER_MAIN_DLG)/i^mouse_item^>=196/i^mouse_item^<=213/i^mouse_action^=(MOUSE_RMB_PRESSED);
@@ -554,41 +611,30 @@ ZVSE2
 
 !!SN:H^secskill^/(school)/0/?(schoolName:z);
 !!VR(picSubtype:y):S(school) *3 +3 +2;
-!!IF:Q1/(PIC_TYPE_SEC_SKILL)/(picSubtype)/4^%(schoolName)^;
+!!IF:Q1/(PIC_TYPE_SEC_SKILL)/(picSubtype)/(MSG_TYPE_POPUP)^%(schoolName)^;
 
-; Learn and unlearn all spells
-!?FU(OnCustomDialogEvent)&i^dlg_id^=(TRAINER_MAIN_DLG)/i^mouse_item^>=109/i^mouse_item^<=110/i^mouse_action^=(MOUSE_LMB_RELEASED);
-!!VR(hero:y):Si^trainer_hero^;
-!!VR(isLearning:y):S(FALSE);
-!!VR(isLearning)&i^mouse_item^=109:S(TRUE);
-!!VR(result:y):S(FALSE);
+; Unequip artifacts and equip them back to update the hero's spell book after removing spells
+!?FU(trainer_UpdateSpellBook);
+!#VA(hero:x);      Hero ID or (CURRENT_HERO).
 
-!!VR(randomSpell1:y):R0/0/(SPELL_LAST_WOG);
-!!VR(randomSpell2:y):R0/0/(SPELL_LAST_WOG);
-!!VR(randomSpell3:y):R0/0/(SPELL_LAST_WOG);
-!!VR(randomSpell4:y):R0/0/(SPELL_LAST_WOG);
+!#VA(equippedArts[19]:y);
+!#VA(equippedArtMods[19]:y);
 
-!!if&(isLearning);
-  !!SN:T^trainer.learnAllSp^/?(dlgStr:z)/^hero^/s^trainer_heroName^;
-  !!IF:N(PIC_TYPE_SPELL)/(randomSpell1)/(PIC_TYPE_SPELL)/(randomSpell2)/(PIC_TYPE_SPELL)/(randomSpell3)/(PIC_TYPE_SPELL)/(randomSpell4) N(MSG_TYPE_QUESTION)/^%(dlgStr)^/?(result);
-!!el;
-  !!SN:T^trainer.forgetAllSp^/?(dlgStr:z)/^hero^/s^trainer_heroName^;
-  !!IF:Q1/(PIC_TYPE_SPELL)/(SPELL_FORGETFULNESS)/(MSG_TYPE_QUESTION)/^%(dlgStr)^;
-  !!VR(result)&1:S(TRUE);
-!!en;
+!!re (slot:y)/0/(equippedArts[SIZE])/1/-1;
+  !!FU(GetArtAtSlot):P(hero)/(slot)/?(art:y)/?(artMod:y);
+  !!VR(equippedArts[slot]):S(NO_ART);
+  !!VR(equippedArtMods[slot]):S(artMod);
 
-!!if&(result);
-  !!re i/(SPELL_FIRST)/(SPELL_LAST_WOG);
-    !!if&(isLearning);
-      !!HE(hero)&i<>(SPELL_TITANS_LIGHTNING_BOLT):Mi/(TRUE);
-    !!el;
-      !!HE(hero):Mi/(FALSE);
-    !!en;
+  !!if&(art)<>(ART_HIGHLIGHTED_SLOT)/(art)<>(ART_ARTIFACT_LOCK);
+    !!VR(equippedArts[slot]):S(art);
+    !!FU(UnequipArtFromSlot):P(hero)/(slot);
   !!en;
 !!en;
 
-!!FU(trainer_RefreshSpellTable):Pi^trainer_spellTablePage^/(hero);
-!!SN:P^openbook.wav^;
+!!re (slot:y)/0/(equippedArts[SIZE])/1/-1;
+  !!VR(art):S(equippedArts[slot]);
+  !!FU(EquipArtToSlot)&(art)<>(NO_ART):P(hero)/(art)/(equippedArtMods[slot])/(slot);
+!!en;
 
 ***************************** END SPELLS ******************************
 
@@ -1514,7 +1560,7 @@ ZVSE2
 !#VA(page:x) (hero:x);
 
 !!re (item:y)/526/540;
-  !!FU(trainer_GetArtOfTheTable):P(page)/(item)/?(art:y);
+  !!FU(trainer_GetArtFromTable):P(page)/(item)/?(art:y);
   !!DL(TRAINER_MAIN_DLG):A(item)/(DLG_CMD_SET_DEF_FRAME)/(art);
 
   !!VR(highlight:y):S(item) -100;
@@ -1538,7 +1584,7 @@ ZVSE2
   !!en;
 !!en;
 
-!?FU(trainer_GetArtOfTheTable);
+!?FU(trainer_GetArtFromTable);
 !#VA(page:x) (item:x) (art:x);
 
 !!VR(item):-526;
@@ -1587,10 +1633,10 @@ ZVSE2
 !?FU(OnCustomDialogEvent)&i^dlg_id^=(TRAINER_MAIN_DLG)/i^mouse_item^>=426/i^mouse_item^<=440/i^mouse_action^=(MOUSE_LMB_PRESSED);
 !!VR(hero:y):Si^trainer_hero^;
 !!VR(item:y):Si^mouse_item^ +100;
-!!FU(trainer_GetArtOfTheTable):Pi^trainer_artTablePage^/(item)/?(art:y);
+!!FU(trainer_GetArtFromTable):Pi^trainer_artTablePage^/(item)/?(art:y);
 
 !!if&(art)<>(ART_SPELL_BOOK)/(art)<>(ART_SPELL_SCROLL);
-  !!FU(trainer_AskToPassArtToHero):P(hero)/(art);
+  !!FU(trainer_PassArtToHero):P(hero)/(art);
 !!el&(art)=(ART_SPELL_BOOK);
   !!HE(hero):A2/(ART_SPELL_BOOK)/?(owned:y)/?(equipped:y);
 
@@ -1598,13 +1644,13 @@ ZVSE2
     !!SN:H^art^/(ART_SPELL_BOOK)/0/?(spellBookName:z) T^trainer.spellBookOwned^/?(spellBookOwned:z)/^hero^/s^trainer_heroName^/^art^/(spellBookName);
     !!IF:Q1/(PIC_TYPE_ART)/(ART_SPELL_BOOK)/1^%(spellBookOwned)^;
   !!el;
-    !!FU(trainer_AskToPassArtToHero):P(hero)/(art);
+    !!FU(trainer_PassArtToHero):P(hero)/(art);
   !!en;
 !!el&(art)=(ART_SPELL_SCROLL);
   !!FU(trainer_GiveSpellScroll):P(hero);
 !!en;
 
-!?FU(trainer_AskToPassArtToHero);       [pass artifact to the hero with artifact table]
+!?FU(trainer_PassArtToHero);       [pass artifact to the hero with artifact table]
 !#VA(hero:x) (art:x);
 
 !!SN:H^art^/(art)/0/?(artName:z) T^trainer.heroArt^/?(heroArtStr:z)/^art^/(artName)/^hero^/s^trainer_heroName^;
@@ -1623,9 +1669,16 @@ ZVSE2
 ; Right-click to get the info of the artifact
 !?FU(OnCustomDialogEvent)&i^dlg_id^=(TRAINER_MAIN_DLG)/i^mouse_item^>=426/i^mouse_item^<=440/i^mouse_action^=(MOUSE_RMB_PRESSED);
 !!VR(item:y):Si^mouse_item^ +100;
-!!FU(trainer_GetArtOfTheTable):Pi^trainer_artTablePage^/(item)/?(art:y);
-!!SN:H^art^/(art)/1/?(artDesc:z);
-!!IF:Q1/(PIC_TYPE_ART)/(art)/4^%(artDesc)^;
+!!FU(trainer_GetArtFromTable):Pi^trainer_artTablePage^/(item)/?(art:y);
+
+; Show description of the artifact if it is not a scroll, otherwise name only
+!!if&(art)<>(ART_SPELL_SCROLL);
+  !!SN:H^art^/(art)/1/?(artStr:z);
+!!el;
+  !!SN:H^art^/(art)/0/?(artStr:z);
+!!en;
+
+!!IF:Q1/(PIC_TYPE_ART)/(art)/4^%(artStr)^;
 
 !?FU(trainer_PlayArtSound);
 !!VR(randNum:y):S1 R6;
@@ -1651,7 +1704,7 @@ ZVSE2
 ; Add in artifact with ID if the first character is a number
 !!if&(result)/(art)>=(ART_FIRST)/(art)<=(lastArt);
   !!if&(art)<>(ART_SPELL_SCROLL);
-    !!FU(trainer_PassArtToHero):P(hero)/(art);
+    !!FU(trainer_PassCustomArtToHero):P(hero)/(art);
   !!el;
     !!FU(trainer_GiveSpellScroll):P(hero);
   !!en;
@@ -1665,7 +1718,7 @@ ZVSE2
 
   !!if&i<=(lastArt);
     !!if&i<>(ART_SPELL_SCROLL);
-      !!FU(trainer_PassArtToHero):P(hero)/i;
+      !!FU(trainer_PassCustomArtToHero):P(hero)/i;
     !!el;
       !!FU(trainer_GiveSpellScroll):P(hero);
     !!en;
@@ -1674,8 +1727,10 @@ ZVSE2
   !!en;
 !!en;
 
-!?FU(trainer_ShowArtDesc);
+!?FU(trainer_ShowCustomArtDesc);
 !#VA(art:x);
+
+!!FU&(art)>=1000:E;                     [Show description only for artifact ID lower than 1000]
 
 !!SN:H^art^/(art)/1/?(artDesc:z);
 !!IF:Q1/(PIC_TYPE_ART)/(art)/1^%(artDesc)^;
@@ -1694,7 +1749,7 @@ ZVSE2
 
 !!if&(result)/(spell)>=(SPELL_FIRST)/(spell)<=(SPELL_LAST_WOG);
   !!VR(art:y):S(spell) +1001;
-  !!FU(trainer_PassArtToHero):P(hero)/(art);
+  !!FU(trainer_PassCustomArtToHero):P(hero)/(art);
 !!el;
   !!re i/(SPELL_FIRST)/(SPELL_LAST_WOG);
     !!SN:H^spell^/i/(SPELL_TEXT_NAME)/?z2;
@@ -1703,18 +1758,18 @@ ZVSE2
   !!en;
 
   !!if&i<=(SPELL_LAST_WOG);
-    !!FU(trainer_PassArtToHero):P(hero)/i;
+    !!FU(trainer_PassCustomArtToHero):P(hero)/i;
   !!el;
     !!IF:M^%T(trainer.noScroll)^;
   !!en;
 !!en;
 
-!?FU(trainer_PassArtToHero);            [pass artifact to the hero with custom artifact feature]
+!?FU(trainer_PassCustomArtToHero);            [pass artifact to the hero with custom artifact feature]
 !#VA(hero:x) (art:x);
 
 !!HE(hero):A4/(art);
 !!FU(trainer_RefreshArtTable):Pi^trainer_artTablePage^/(hero);
-!!FU(trainer_ShowArtDesc)&(art)<1000:P(art);
+!!FU(trainer_ShowCustomArtDesc):P(art);
 !!FU(trainer_PlayArtSound):P;
 
 !!FU(trainer_RefreshPrimSkills):Pi^trainer_hero^; [refresh hero's primary skills as they might be changed]
