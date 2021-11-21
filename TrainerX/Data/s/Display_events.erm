@@ -3,46 +3,43 @@ ZVSE2
 ; Engine:   ERM 2.0+
 ; Requires: ERA 3.3+, Era Erm Framework
 
-; Toggle event displaying.
+; Toggle displaying events
 
-
-!?FU78006990;
-!!UN:Ux1/-1/-1/1; event in v1/v2/v3
-!!UN:Iv1/v2/v3/63/64;
-!!TRv1/v2/v3:P1; make passable debug
 
 !?FU(OnGameEnter);
-;display events @gamecreator
+; display events @gamecreator
 !!SN:L^erm_hooker.era^/?y1 Ay1/^SetHook^/?y2;
 
 !!if&y2<>0;
-  !!SN:Ey2/1/7658344/1073848320; enable OB26 trigger
-  !!SN:Ey2/1/7658538/1208066048; enable OB26 post-trigger
+  !!SN:Ey2/1/7658344/1073848320;        [enable OB26 trigger]
+  !!SN:Ey2/1/7658538/1208066048;        [enable OB26 post-trigger]
 !!en;
 
 !?FU(trainer_SetUpDisplayEvents);
 !!if&i^trainer_events_on^=(FALSE);
-  !!UN:U26/-1/?y10; [Number of events on the map: y10]
-  !!VRv1:S-1; [Initialize v1 to -1 to work with new faster UN:U syntax]
-  !!DO78006990/1/y10/1&y10>0:P26; [Cycle through all events]
+  !!UN:U26/-1/?y10;                     [Number of events on the map: y10]
+  !!VRv2:S-1;                           [Initialize v1 to -1 to work with new faster UN:U syntax]
+  !!DO(event_Function1)/1/y10/1&y10>0:P26;       [Cycle through all events]
   !!VRi^trainer_events_on^:S(TRUE);
-  !!SN:T^trainer.addEventsOn^/?z2;
-  !!IF:L^%z2^;
-  !!VRz1:S^Military.wav^;
-  !!SN:Pz1;
+  !!IF:L^%T(trainer.addEventsOn)^;
+  !!SN:P^Military.wav^;
 !!el;
-  !!UN:U26/-1/?y10; [Number of events on the map: y10]
-  !!VRv6:S-1; [Initialize v1 to -1 to work with new faster UN:U syntax]
-  !!UN:U26/-1/?y10; [Number of events on the map: y10]
-  !!FU78007010:P63/64/?v5; get object id of 63/64
-  !!VRv2:S-1; [Initialize v2 to -1 to work with new faster UN:U syntax]
-  !!DO78007000/1/y10/1&y10>0:Pv5/26; [Cycle through all events]
+  !!UN:U26/-1/?y10;                     [Number of events on the map: y10]
+  !!VRv6:S-1;                           [Initialize v1 to -1 to work with new faster UN:U syntax]
+  !!UN:U26/-1/?y10;                     [Number of events on the map: y10]
+  !!FU(event_Function2):P63/64/?v5;              [get object id of 63/64]
+  !!VRv2:S-1;                           [Initialize v2 to -1 to work with new faster UN:U syntax]
+  !!DO(event_Function3)/1/y10/1&y10>0:Pv5/26;    [Cycle through all events]
   !!VRi^trainer_events_on^:S(FALSE);
-  !!SN:T^trainer.addEventsOff^/?z2;
-  !!IF:L^%z2^;
+  !!IF:L^%T(trainer.addEventsOff)^;
 !!en;
 
-!?FU78007010;
+!?FU(event_Function1);
+!!UN:Ux1/-1/-1/2;                       [event in v2/v3/v4]
+!!UN:Iv2/v3/v4/63/64;
+!!TR2:P1;                               [make passable debug]
+
+!?FU(event_Function2);
 ; x1 = type
 ; x2 = subtype
 ; returns x3 = id
@@ -65,7 +62,7 @@ ZVSE2
 !!VRy5:+68; next subtype
 !!SN:G7; loop end
 
-!?FU78007000;
+!?FU(event_Function3);
 ; x1 = object id
 ; x2 = target tile type
 !!UN:C6919480/4/?y1; 0x699538
@@ -100,7 +97,7 @@ ZVSE2
 !!VRy6:+4; next render unprocessed
 !!SN:G13; loop end
 
-!?FU78007020;
+!?FU(event_Function4);
 ; x1 = object id
 ; x2/x3/x4 = x/y/l
 !!UN:C6919480/4/?y1; 0x699538
@@ -134,5 +131,5 @@ ZVSE2
 !!SN:G12; loop end
 
 !$OB(OBJ_EVENT)&1000;
-!!FU78007010:P63/64/?v5;
-!!FU78007020:Pv5/v998/v999/v1000;
+!!FU(event_Function2):P63/64/?v5;
+!!FU(event_Function4):Pv5/v998/v999/v1000;

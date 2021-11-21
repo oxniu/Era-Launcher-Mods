@@ -213,8 +213,7 @@ ZVSE2
     !!IF:M^%(objMainNoHero)^;
   !!en;
 !!el;
-  ; If clicked on other objects, pops up trainer name enter dialogue
-  ; If the right clicked object is not hero/town/dwelling/mine/shipyard, pops up dialogue
+  ; If the right clicked object is not a hero/town/dwelling/mine/shipyard, show dialogue
   !!FU(trainer_SelectHeroMain):P;     
 !!en;
 
