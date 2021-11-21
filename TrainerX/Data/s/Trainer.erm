@@ -7,37 +7,6 @@ ZVSE2
 ; Ultimate trainer for ERA
 
 
-; FU7780004 spells cadres
-; FU7780005 air spells
-; FU7780006 water spells
-; FU7780007 earth spells
-; FU7780008 fire spells
-; FU7780009 reset clicked cadres
-; FU7780010 loop magic schools
-; FU7780011 hero forgets all spells
-; FU7780012 *removed*
-; FU7780013 *removed*
-; FU7780014 *removed*
-; FU7780015 *removed*
-; FU7780016 *removed*
-; FU7780017 *removed*
-; FU7780018 *removed*
-; FU7780019 *removed*
-; FU7780020 *removed*
-; FU7780021 *removed*
-; FU7780022 *removed*
-; FU7780023 *removed*
-; FU7780024 *removed*
-; FU7780025 *removed*
-; FU7780026 *removed*
-; FU7780026 *removed*
-; FU7780028 *removed*
-; FU7780029 *removed*
-; FU7780030 *removed*
-; FU7780031 *removed*
-; FU7780032-FU7780034 forget all skills, frames
-
-
 !?FU(OnAfterErmInstructions);
 !!FU(trainer_CheckWoGScripts):P;
 !!FU(trainer_GetFirstHumanPlayer):P?(player:y);
@@ -88,7 +57,7 @@ ZVSE2
 !#VA(isWrongName:x);
 
 !!VRz1:Ss^trainer_input^;
-!!FU(trainer_CheckZ1FirstCharacterIsNum):P?(result:y);
+!!FU(trainer_CheckIFZ1FirstCharIsNum):P?(result:y);
 !!VR(hero:y)&(result):Vz1;
 
 !!if&(result)/(hero)>(NO_HERO)/(hero)<=(HERO_LAST_WOG);  [doesn't support extended hero id]
@@ -149,8 +118,11 @@ ZVSE2
 !!HE(hero):O?i^trainer_player^;         [set trainer player number]
 !!FU(trainer_GetPlayerStr):Pi^trainer_player^; [set trainer player string]
 !!FU(trainer_GetPrimSkillCap):P;               [check if prima.dll is enabled]
-!!VRi^trainer_monTablePage^:S(TOWN_CASTLE); [set the page of monster table]
-!!VRi^trainer_artTablePage^:S0;         [set the page of artifact table]
+
+; Set the page of tables
+!!VRi^trainer_monTablePage^:S(TOWN_CASTLE);
+!!VRi^trainer_artTablePage^:S0;
+!!VRi^trainer_spellTablePage^:S0;
 
 !!DL(TRAINER_MAIN_DLG):N^trainer.txt^;
 
@@ -190,17 +162,14 @@ ZVSE2
 !!FU(trainer_GetHeroPortrait):P(hero)/1/2; [export hero's large portrait to z2]
 !!DL(TRAINER_MAIN_DLG):A99/(DLG_CMD_SET_PCX)/z2/1;
 
-!!SN:W^Fire_school^/1;
-!!SN:W^Air_school^/0;
-!!SN:W^Water_school^/0;
-!!SN:W^Earth_school^/0;
-!!DO7780004/196/213/1:P;
-
 !!FU(acm_CreateSsNamesArray)&i^Advanced_Classes_Mod_Active^:P;
 
 !!VR(player:y):Si^trainer_player^;
 !!FU(trainer_RefreshResources):P(player);[Check resources including mithril]
 !!FU(trainer_RefreshDlgsOnLevelUp):P(hero);
+
+!!FU(trainer_CreateSpellArrays):P;
+!!FU(trainer_RefreshSpellTable):Pi^trainer_spellTablePage^/(hero);
 
 !!DL(TRAINER_MAIN_DLG):S1;
 !!UN:R1 R2;                             [Redraw screen after DL is closed - Thanks to daemon_n!]
@@ -208,7 +177,7 @@ ZVSE2
 !?FU(trainer_RefreshDlgsOnLevelUp);
 !#VA(hero:x);
 
-!!FU(trainer_RefreshArtTable):Pi^trainer_artTablePage^;
+!!FU(trainer_RefreshArtTable):Pi^trainer_artTablePage^/(hero);
 !!FU(trainer_RefreshPrimSkills):P(hero);
 !!FU(trainer_RefreshSecSkills):P(hero);
 !!FU(trainer_RefreshMoveBar):P(hero);
@@ -253,7 +222,7 @@ ZVSE2
   !!VR(manaCadre):S25;
 !!en;
 
-!!DL(TRAINER_MAIN_DLG):A31/(DLG_CMD_SET_DEF_FRAME)/(manaCadre)/1;
+!!DL(TRAINER_MAIN_DLG):A32/(DLG_CMD_SET_DEF_FRAME)/(manaCadre)/1;
 
 !?FU(trainer_GetHeroPortrait);
 ; x1 - hero's number (0..155)
@@ -350,10 +319,6 @@ ZVSE2
   !!DL(TRAINER_MAIN_DLG):C1;
   !!HE(hero):E?(exp)/(lvNew);
 
-  !!re (item:y)/196/212;                [de-select all fire spells (spell of the first page)]
-    !!VRi^Fire_%(item)^:S(FALSE);
-  !!en;
-
   !!VRi^trainer_dialogEnabled^:S(FALSE);[flag for trainer interface]
 !!en;
 
@@ -375,14 +340,12 @@ ZVSE2
     !!VR(lvFixed):S3732;
   !!el&(lv)>3732/(lv)<=5920;
     !!VR(lvFixed):S5920;
-  !!el&(lv)>5920/(lv)<=(TRAINER_LEVEL_CAP_EXTREME);
+  !!el&(lv)>5920/(lv);
     !!VR(lvFixed):S(TRAINER_LEVEL_CAP_EXTREME);
-  !!el&(lv)>(TRAINER_LEVEL_CAP_EXTREME);
-    !!VR(lvFixed):S1;
   !!en;
 !!el;
   !!if&(lv)<1;
-    !!VR(lvFixed):S(TRAINER_LEVEL_CAP_EXTREME);
+    !!VR(lvFixed):S1;
   !!el&(lv)>=(TRAINER_LEVEL_CAP_LEGIT)/(lv)<88;
     !!VR(lvFixed):S(TRAINER_LEVEL_CAP_LEGIT);
   !!el&(lv)>=88/(lv)<100;
@@ -402,7 +365,7 @@ ZVSE2
   !!en;
 !!en;
 
-!?FU(trainer_CheckZ1FirstCharacterIsNum);[Hawaiing]
+!?FU(trainer_CheckIFZ1FirstCharIsNum);[Hawaiing]
 !#VA(result:x);
 
 !!VR(result):S(FALSE);
@@ -421,307 +384,211 @@ ZVSE2
 !!IF:Q1/(PIC_TYPE_FLAG)/i^trainer_player^/(PIC_TYPE_FLAG)/i^trainer_player^/1^%z177300^;
 
 **************************** SPELLS ************************************
-; buttons of magic schools/right
-!?FU(OnCustomDialogEvent)&i^dlg_id^=(TRAINER_MAIN_DLG)/i^mouse_item^=14/i^mouse_action^=(MOUSE_LMB_RELEASED);
-!!SN:W^Fire_school^/?y1;
-!!SN:W^Air_school^/?y2;
-!!SN:W^Water_school^/?y3;
-!!SN:W^Earth_School^/?y4;
-!!DO7780005/36/53/1&y1=1:P18;           [fire-->air]
-!!DL(TRAINER_MAIN_DLG)&y1=1:A11/(DLG_CMD_SET_DEF_FRAME)/1/1;
-!!DO7780006/36/53/1&y2=1:P36;           [air-->water]
-!!DL(TRAINER_MAIN_DLG)&y2=1:A11/(DLG_CMD_SET_DEF_FRAME)/2/1;
-!!DO7780007/36/53/1&y3=1:P54;           [water-->earth]
-!!DL(TRAINER_MAIN_DLG)&y3=1:A11/(DLG_CMD_SET_DEF_FRAME)/3/1;
-!!DO7780008/36/53/1&y4=1:P0;            [Archer - earth-->fire]
-!!DL(TRAINER_MAIN_DLG)&y4=1:A11/(DLG_CMD_SET_DEF_FRAME)/0/1;
-!!SN&y1=1:W^Air_school^/1;
-!!SN&y1=1:W^Fire_school^/0;
-!!SN&y2=1:W^Water_school^/1;
-!!SN&y2=1:W^Air_school^/0;
-!!SN&y3=1:W^Earth_school^/1;
-!!SN&y3=1:W^Water_school^/0;
-!!SN&y4=1:W^Fire_school^/1;
-!!SN&y4=1:W^Earth_school^/0;
-!!DO7780004/196/213/1:P;                [reset selected cadres, if any]
-!!DO7780009/196/213/1:P;
 
-!?FU7780005;
-; display air spells icons
-!!DL(TRAINER_MAIN_DLG):Ax16/(DLG_CMD_SET_DEF_FRAME)/x1/1;
-!!VRx1:+1;
-!?FU7780006;
-; display water spells icons
-!!DL(TRAINER_MAIN_DLG):Ax16/(DLG_CMD_SET_DEF_FRAME)/x1/1;
-!!VRx1:+1;
-!?FU7780007;
-; display earth spells icons
-!!DL(TRAINER_MAIN_DLG):Ax16/(DLG_CMD_SET_DEF_FRAME)/x1/1;
-!!VRx1:+1;
-!?FU7780008;
-; display fire spells icons
-!!DL(TRAINER_MAIN_DLG):Ax16/(DLG_CMD_SET_DEF_FRAME)/x1/1;
-!!VRx1:+1;
+!?FU(trainer_CreateSpellArrays);
+!!FU(NewIntArray):P?i^trainer_airSpells^/(M_TEMP) P?i^trainer_fireSpells^/(M_TEMP) P?i^trainer_waterSpells^/(M_TEMP) P?i^trainer_earthSpells^/(M_TEMP);
 
-; button magic schools/left
-!?FU(OnCustomDialogEvent)&i^dlg_id^=(TRAINER_MAIN_DLG)/i^mouse_item^=13/i^mouse_action^=(MOUSE_LMB_RELEASED);
-!!SN:W^Earth_school^/?y1;
-!!SN:W^Water_school^/?y2;
-!!SN:W^Air_school^/?y3;
-!!SN:W^Fire_school^/?y4;
-!!DO7780006/36/53/1&y1=1:P36;           [earth-->water]
-!!DL(TRAINER_MAIN_DLG)&y1=1:A11/(DLG_CMD_SET_DEF_FRAME)/2/1;
-!!DO7780005/36/53/1&y2=1:P18;           [water-->air]
-!!DL(TRAINER_MAIN_DLG)&y2=1:A11/(DLG_CMD_SET_DEF_FRAME)/1/1;
-!!DO7780008/36/53/1&y3=1:P0;            [air-->fire]
-!!DL(TRAINER_MAIN_DLG)&y3=1:A11/(DLG_CMD_SET_DEF_FRAME)/0/1;
-!!DO7780008/36/53/1&y4=1:P54;            [fire-->earth]
-!!DL(TRAINER_MAIN_DLG)&y4=1:A11/(DLG_CMD_SET_DEF_FRAME)/3/1;
-!!SN&y1=1:W^Water_school^/1;
-!!SN&y1=1:W^Earth_school^/0;
-!!SN&y2=1:W^Air_school^/1;
-!!SN&y2=1:W^Water_school^/0;
-!!SN&y3=1:W^Fire_school^/1;
-!!SN&y3=1:W^Air_school^/0;
-!!SN&y4=1:W^Earth_school^/1;
-!!SN&y4=1:W^Fire_school^/0;
-!!DO7780004/196/213/1:P;                [reset selected cadres, if any]
-!!DO7780009/196/213/1:P;
+!!re i/(SPELL_FIRST)/(SPELL_LAST_WOG);
+  !!co|i=(SPELL_TITANS_LIGHTNING_BOLT)/i=(SPELL_MAGIC_ARROW)/i=(SPELL_VISIONS); [Assume that Titan's Lightning Bolt is always an air spell, Magic Arrow and Visions are always all schools]
 
-!?FU(OnCustomDialogEvent)&i^dlg_id^=(TRAINER_MAIN_DLG)/i^mouse_item^>195/i^mouse_item^<214/i^mouse_action^=(MOUSE_RMB_PRESSED);
-; Display spells names on right-click
-!!if&i^Fire_school^;
-  !!FU&i^mouse_item^=213:E; last icon is not used
+  !!SSi:S?(school:y);
 
-  !!VRv2:C43/42/15/31/62/13/21/11/52/26/59/29/56/22/55/66; [index of fire spells]
-  !!VRv18:S40;
-!!el&i^Air_school^;
-  !!VRv2:C53/47/51/17/44/30/28/25/60/19/58/69/36/5/4/2; [index of air spells]
-  !!VRv18:C8/6;
-!!el&i^Water_school^;
-  !!FU&i^mouse_item^=213:E; last icon is not used
-
-  !!VRv2:C41/37/35/32/16/64/45/61/20/49/63/65/48/68/0/1; [index of water spells]
-  !!VRv18:S7;
-!!el&i^Earth_school^;
-  !!VRv2:C15/27/54/46/24/10/39/34/14/12/33/23/38/50/67/18; [index of earth spells]
-  !!VRv18:C3/9;
+  !!if&(school)=1;
+    !!FU(Array_Push):Pi^trainer_airSpells^/i;
+  !!el&(school)=2;
+    !!FU(Array_Push):Pi^trainer_fireSpells^/i;
+  !!el&(school)=4;
+    !!FU(Array_Push):Pi^trainer_waterSpells^/i;
+  !!el&(school)=8;
+    !!FU(Array_Push):Pi^trainer_earthSpells^/i;
+  !!en;
 !!en;
 
-!!VR(ptr:y):Si^mouse_item^-194;         [get click location to match v2-v20]
-!!VR(spell:y):Sv(ptr);                  [spell is now stored in y6]
+; Make sure the size of arrays are 18
+!!FU(Array_Push):Pi^trainer_airSpells^/(SPELL_TITANS_LIGHTNING_BOLT); [Add in Titan's Lightning Bolt at the end of the Air Spell array]
+!!FU(trainer_EnsureArraySizes):Pi^trainer_airSpells^/0;
+!!FU(trainer_EnsureArraySizes):Pi^trainer_fireSpells^/1;
+!!FU(trainer_EnsureArraySizes):Pi^trainer_waterSpells^/0;
+!!FU(trainer_EnsureArraySizes):Pi^trainer_earthSpells^/1;
+
+!?FU(trainer_EnsureArraySizes);
+!#VA(array:x) (offset:x);
+
+!!SN:M(array)/?(size:y);
+!!VR(gap:y):S18 -(size);
+
+; Add in Magic Arrow and Visions if the school is not full
+!!if&(gap)>0;
+  !!re (index:y)/0/(gap)/1/-1;
+    !!VR(spellIndex:y):S(index) +(offset) %2;
+
+    !!if&(spellIndex)=0;
+      !!FU(Array_Push):P(array)/(SPELL_MAGIC_ARROW);
+    !!el;
+      !!FU(Array_Push):P(array)/(SPELL_VISIONS);
+    !!en;
+  !!en;
+; Remove excessive items if there is
+!!el;
+  !!FU(Array_Resize):P(array)/18;
+!!en;
+
+; Refresh the table of spells
+!?FU(trainer_RefreshSpellTable);
+!#VA(page:x) (hero:x);
+
+!!if&(page)=0;
+  !!VR(spellArray:y):Si^trainer_airSpells^;
+!!el&(page)=1;
+  !!VR(spellArray):Si^trainer_fireSpells^;
+!!el&(page)=2;
+  !!VR(spellArray):Si^trainer_waterSpells^;
+!!el&(page)=3;
+  !!VR(spellArray):Si^trainer_earthSpells^;
+!!en;
+
+!!SN:M(spellArray)/?(size:y);
+
+!!re (arrayIndex:y)/0/(size)/1/-1;
+  !!SN:M(spellArray)/(arrayIndex)/?(spell:y);
+  !!VR(item:y):S(arrayIndex) +36;
+  !!VR(cadre:y):S(spell) +1;
+
+  !!HE(hero):M=(spell)/1;
+
+  !!if&1;
+    !!VR(spellLearned:y):S(TRUE);
+  !!el;
+    !!VR(spellLearned):S(FALSE);
+  !!en;
+
+  !!VR(highlight:y):S(arrayIndex) +196;
+
+  !!DL(TRAINER_MAIN_DLG):A(item)/(DLG_CMD_SET_DEF_FRAME)/(cadre)/1;
+  !!DL(TRAINER_MAIN_DLG):A(highlight)/(DLG_CMD_SET_DEF_FRAME)/(spellLearned)/1;
+!!en;
+
+!!DL(TRAINER_MAIN_DLG):A11/(DLG_CMD_SET_DEF_FRAME)/(page)/1; [School icon]
+
+; Right button for the next page
+!?FU(OnCustomDialogEvent)&i^dlg_id^=(TRAINER_MAIN_DLG)/i^mouse_item^=14/i^mouse_action^=(MOUSE_LMB_RELEASED);
+!!if&i^trainer_spellTablePage^<3;
+  !!VRi^trainer_spellTablePage^:+1;
+!!el;
+  !!VRi^trainer_spellTablePage^:S0;
+!!en;
+
+!!FU(trainer_RefreshSpellTable):Pi^trainer_spellTablePage^/i^trainer_hero^;
+
+; Left button for the previouis page
+!?FU(OnCustomDialogEvent)&i^dlg_id^=(TRAINER_MAIN_DLG)/i^mouse_item^=13/i^mouse_action^=(MOUSE_LMB_RELEASED);
+!!if&i^trainer_spellTablePage^>0;
+  !!VRi^trainer_spellTablePage^:-1;
+!!el;
+  !!VRi^trainer_spellTablePage^:S3;
+!!en;
+
+!!FU(trainer_RefreshSpellTable):Pi^trainer_spellTablePage^/i^trainer_hero^;
+
+; Learn and unlearn a spell by left-clicking
+!?FU(OnCustomDialogEvent)&i^dlg_id^=(TRAINER_MAIN_DLG)/i^mouse_item^>=196/i^mouse_item^<=213/i^mouse_action^=(MOUSE_LMB_PRESSED);
+!!VR(hero:y):Si^trainer_hero^;
+!!VR(page:y):Si^trainer_spellTablePage^;
+!!VR(index:y):Si^mouse_item^ -196;
+
+!!if&(page)=0;
+  !!VR(spellArray:y):Si^trainer_airSpells^;
+!!el&(page)=1;
+  !!VR(spellArray):Si^trainer_fireSpells^;
+!!el&(page)=2;
+  !!VR(spellArray):Si^trainer_waterSpells^;
+!!el&(page)=3;
+  !!VR(spellArray):Si^trainer_earthSpells^;
+!!en;
+
+!!SN:M(spellArray)/(index)/?(spell:y);
+!!HE(hero):M=(spell)/1;
+
+!!if&1;
+  !!HE(hero):M(spell)/(FALSE);
+  !!DL(TRAINER_MAIN_DLG):Ai^mouse_item^/(DLG_CMD_SET_DEF_FRAME)/(FALSE)/1;
+!!el;
+  !!HE(hero):M(spell)/(TRUE);
+  !!DL(TRAINER_MAIN_DLG):Ai^mouse_item^/(DLG_CMD_SET_DEF_FRAME)/(TRUE)/1;
+!!en;
+
+!!SN:P^button.wav^;
+
+; Show spells names by right-clicking
+!?FU(OnCustomDialogEvent)&i^dlg_id^=(TRAINER_MAIN_DLG)/i^mouse_item^>=196/i^mouse_item^<=213/i^mouse_action^=(MOUSE_RMB_PRESSED);
+!!VR(hero:y):Si^trainer_hero^;
+!!VR(page:y):Si^trainer_spellTablePage^;
+!!VR(index:y):Si^mouse_item^ -196;
+
+!!if&(page)=0;
+  !!VR(spellArray:y):Si^trainer_airSpells^;
+!!el&(page)=1;
+  !!VR(spellArray):Si^trainer_fireSpells^;
+!!el&(page)=2;
+  !!VR(spellArray):Si^trainer_waterSpells^;
+!!el&(page)=3;
+  !!VR(spellArray):Si^trainer_earthSpells^;
+!!en;
+
+!!SN:M(spellArray)/(index)/?(spell:y);
+
 !!SN:H^spell^/(spell)/(SPELL_TEXT_DESCR)/?(spellDesc:z); [store spell description in z3]
 !!IF:Q1/9/(spell)/4^%(spellDesc)^;      [display spell graphic and name]
 
-!?FU(OnCustomDialogEvent)&i^dlg_id^=(TRAINER_MAIN_DLG)/i^mouse_item^>195/i^mouse_item^<214/i^mouse_action^=(MOUSE_LMB_PRESSED);
-; select spells
-!!SN:W^Fire_school^/?y1;                [check page]
-!!SN:W^Air_school^/?y2;
-!!SN:W^Water_school^/?y3;
-!!SN:W^Earth_school^/?y4;
-!!FU&y1=1/i^mouse_item^=213:E;          [Archer - toggle spell cadre]
-!!FU&y3=1/i^mouse_item^=213:E;          [exit if last icon in fire/water indexes]
-
-!!VRy30:S0;
-!!VRy30&y1=1/i^Fire_%i(mouse_item)^=1:S1;
-!!VRy30&y2=1/i^Air_%i(mouse_item)^=1:S1;
-!!VRy30&y3=1/i^Water_%i(mouse_item)^=1:S1;
-!!VRy30&y4=1/i^Earth_%i(mouse_item)^=1:S1;
-
-!!if&y30=0;
-  !!DL(TRAINER_MAIN_DLG):Ai^mouse_item^/(DLG_CMD_SET_DEF_FRAME)/1/1; [set to selected]
-  !!SN&y1=1:W^Fire_%i(mouse_item)^/1;
-  !!SN&y2=1:W^Air_%i(mouse_item)^/1;
-  !!SN&y3=1:W^Water_%i(mouse_item)^/1;
-  !!SN&y4=1:W^Earth_%i(mouse_item)^/1;
-!!el;
-  !!DL(TRAINER_MAIN_DLG):Ai^mouse_item^/(DLG_CMD_SET_DEF_FRAME)/0/1; [set to de-selected]
-  !!SN&y1=1:W^Fire_%i(mouse_item)^/0;
-  !!SN&y2=1:W^Air_%i(mouse_item)^/0;
-  !!SN&y3=1:W^Water_%i(mouse_item)^/0;
-  !!SN&y4=1:W^Earth_%i(mouse_item)^/0;
-!!en;
-
-!?FU(OnCustomDialogEvent)&i^dlg_id^=(TRAINER_MAIN_DLG)/i^mouse_item^=110/i^mouse_action^=(MOUSE_LMB_RELEASED); Button hero forgets all spells
-!!re i/196/213;                         [Archer - deselect all by forget all spell button]
-  !!VRy30:S0;
-  !!VRy30&i^Fire_School^=1/i^Fire_%i^=1:S1;
-  !!VRy30&i^Air_School^=1/i^Air_%i^=1:S1;
-  !!VRy30&i^Water_School^=1/i^Water_%i^=1:S1;
-  !!VRy30&i^Earth_School^=1/i^Earth_%i^=1:S1;
-
-  !!if&y30=1;
-    !!DO7780009/196/213/1:P;
-    !!DO7780004/196/213/1:P;
-    !!FU:E;
-  !!en;
-!!en;
-
-!!SN:W^trainer_hero^/?y1;
-!!HEy1:B0/?z1;
-!!SN:T^trainer.forgAllSpl^/?z2/^hero^/z1;
-!!IF:Q1^%z2^;
-!!FU&-1:E;
-
-!!DO7780011/0/69/1:Py1;
-!!SN:P^openbook.wav^;
-
-!?FU7780011;                            [Hero forgets all spells]
-!!HEx1:Mx16/?y1;
-!!HEx1&y1=1:Mx16/0;
-
-!?FU(OnCustomDialogEvent)&i^dlg_id^=(TRAINER_MAIN_DLG)/i^mouse_item^=109/i^mouse_action^=(MOUSE_LMB_RELEASED); Button learn spells selected
-!!SN:W^Fire_school^/?y1;                [find in which index we are]
-!!SN:W^Air_school^/?y2;
-!!SN:W^Water_school^/?y3;
-!!SN:W^Earth_school^/?y4;
-
-!!if|y1=1/y3=1;                         [Archer - select all by learn spell button]
-
-  !!re i/196/212;
-
-    !!br&y1=1/i^Fire_%i^=1;
-    !!br&y3=1/i^Water_%i^=1;
-
-    !!if&i=212;
-      !!re i/196/212;
-        !!VRi^Fire_%i^:S1;
-        !!VRi^Air_%i^:S1;
-        !!VRi^Water_%i^:S1;
-        !!VRi^Earth_%i^:S1;
-        !!DL(TRAINER_MAIN_DLG):Ai/(DLG_CMD_SET_DEF_FRAME)/1/1;
-      !!en;
-
-      !!FU:E;
-    !!en;
-  !!en;
-!!en;
-
-!!if|y2=1/y4=1;
-
-  !!re i/196/213;
-
-    !!br&y2=1/i^Air_%i^=1;
-    !!br&y4=1/i^Earth_%i^=1;
-
-    !!if&i=213;
-      !!re i/196/213;
-        !!VRi^Fire_%i^:S1;
-        !!VRi^Air_%i^:S1;
-        !!VRi^Water_%i^:S1;
-        !!VRi^Earth_%i^:S1;
-        !!DL(TRAINER_MAIN_DLG):Ai/(DLG_CMD_SET_DEF_FRAME)/1/1;
-      !!en;
-
-      !!FU:E;
-    !!en;
-  !!en;
-!!en;
-
-!!VRy30:Si^trainer_hero^;               [disable annoying pop-ups]
-!!HEy30:B0/?z6;
-!!HEy30:A2/0/?y7/?y8;
-!!HEy30&y8<1:A4/0;                      [give spell book]
-!!VRz4:S^^;
-!!VRz5:S^^;
-!!DO7780010/196/213/1&y1=1:P0;
-!!DO7780010/196/213/1&y2=1:P1;
-!!DO7780010/196/213/1&y3=1:P2;
-!!DO7780010/196/213/1&y4=1:P3;
-!!VRz2:S^^;
-!!VRz3:S^^;
-
-!!if&z4<>^^;
-  !!SN:T^trainer.splLearned^/?z2/^hero^/z6/^spell^/z4;
-  !!VRz7:Sz2;
-!!en;
-
-!!if&z5<>^^;
-  !!SN:T^trainer.splLearns^/?z3/^hero^/z6/^spell^/z5;
-
-  !!if&z4<>^^;
-    !!VRz7:S^%z2
-
-%z3^;
-  !!el;
-    !!VRz7:Sz3;
-  !!en;
-!!en;
-
-!!IF:M^%z7^;
-
-!!SN:P^openbook.wav^;
-
-!!DO7780009/196/213/1:P;                [reset spells after learning them]
-!!DO7780004/196/213/1:P;                [reset cadres]
-
-!?FU7780010;
-; x1 magic school ID
-!!VRz1&x1=0:S^Fire^;
-!!VRz1&x1=1:S^Air^;
-!!VRz1&x1=2:S^Water^;
-!!VRz1&x1=3:S^Earth^;
-!!SN:W^%Z1_%X16^/?y1;
-!!FU&y1<1:E;
-
-!!if&x1=0;
-  !!FU&x16=213:E;                       [last icon is not used]
-
-  !!VRv2:C42/43/15/31/62/13/21/11/52/26/59/29/56/22/55/66; [index of fire spells]
-  !!VRv18:S40;
-!!el&x1=1;
-  !!VRv2:C53/47/51/17/44/30/28/25/60/19/58/69/36/5/4/2; [index of air spells]
-  !!VRv18:C8/6;
-!!el&x1=2;
-  !!FU&x16=213:E;                       [last icon is not used]
-
-  !!VRv2:C41/37/35/32/16/64/45/61/20/49/63/65/48/68/0/1; [index of water spells]
-  !!VRv18:S7;
-!!el&x1=3;
-  !!VRv2:C15/27/54/46/24/10/39/34/14/12/33/23/38/50/67/18; [index of earth spells]
-  !!VRv18:C3/9;
-!!en;
-
-!!VRy5:Sx16-194;                        [get click location to match v2-v20]
-!!VRy6:Svy5;                            [spell is now stored in y6]
-!!VRy30:Si^trainer_hero^;
-!!HEy30:My6/?y7;
-!!UN:N1/z3/y6;
-!!SN:T^trainer.comma^/?z1;
-
-!!if&y7=1;
-  !!VRz4&z4<>^^:+^%z1^;
-  !!VRz4:+z3;
-!!el;
-  !!VRz5&z5<>^^:+^%z1^;
-  !!VRz5:+z3;
-  !!HEy30:My6/1;
-!!en;
-
-!?FU7780009;                            [forget spells selected if change magic school]
-!!SN:W^Fire_%X16^/0;
-!!SN:W^Air_%X16^/0;
-!!SN:W^Water_%X16^/0;
-!!SN:W^Earth_%X16^/0;
-
-!?FU7780004;
-; Spell cadres reset to 0
-!!DL(TRAINER_MAIN_DLG):Ax16/(DLG_CMD_SET_DEF_FRAME)/0/1;
-
+; Show info of the school by right-clicking
 !?FU(OnCustomDialogEvent)&i^dlg_id^=(TRAINER_MAIN_DLG)/i^mouse_item^=54/i^mouse_action^=(MOUSE_RMB_PRESSED);
-!!if&i^Fire_school^;
-  !!VR(school:y):S(SKILL_FIRE_MAGIC);
-!!el&i^Air_school^;
-  !!VR(school):S(SKILL_AIR_MAGIC);
-!!el&i^Water_school^;
+!!if&i^trainer_spellTablePage^=0;
+  !!VR(school:y):S(SKILL_AIR_MAGIC);
+!!el&i^trainer_spellTablePage^=1;
+  !!VR(school):S(SKILL_FIRE_MAGIC);
+!!el&i^trainer_spellTablePage^=2;
   !!VR(school):S(SKILL_WATER_MAGIC);
-!!el&i^Earth_school^;
+!!el&i^trainer_spellTablePage^=3;
   !!VR(school):S(SKILL_EARTH_MAGIC);
 !!en;
 
 !!SN:H^secskill^/(school)/0/?(schoolName:z);
 !!VR(picSubtype:y):S(school) *3 +3 +2;
 !!IF:Q1/(PIC_TYPE_SEC_SKILL)/(picSubtype)/4^%(schoolName)^;
+
+; Learn and unlearn all spells
+!?FU(OnCustomDialogEvent)&i^dlg_id^=(TRAINER_MAIN_DLG)/i^mouse_item^>=109/i^mouse_item^<=110/i^mouse_action^=(MOUSE_LMB_RELEASED);
+!!VR(hero:y):Si^trainer_hero^;
+!!VR(isLearning:y):S(FALSE);
+!!VR(isLearning)&i^mouse_item^=109:S(TRUE);
+!!VR(result:y):S(FALSE);
+
+!!VR(randomSpell1:y):R0/0/(SPELL_LAST_WOG);
+!!VR(randomSpell2:y):R0/0/(SPELL_LAST_WOG);
+!!VR(randomSpell3:y):R0/0/(SPELL_LAST_WOG);
+!!VR(randomSpell4:y):R0/0/(SPELL_LAST_WOG);
+
+!!if&(isLearning);
+  !!SN:T^trainer.learnAllSp^/?(dlgStr:z)/^hero^/s^trainer_heroName^;
+  !!IF:N(PIC_TYPE_SPELL)/(randomSpell1)/(PIC_TYPE_SPELL)/(randomSpell2)/(PIC_TYPE_SPELL)/(randomSpell3)/(PIC_TYPE_SPELL)/(randomSpell4) N(MSG_TYPE_QUESTION)/^%(dlgStr)^/?(result);
+!!el;
+  !!SN:T^trainer.forgetAllSp^/?(dlgStr:z)/^hero^/s^trainer_heroName^;
+  !!IF:Q1/(PIC_TYPE_SPELL)/(SPELL_FORGETFULNESS)/(MSG_TYPE_QUESTION)/^%(dlgStr)^;
+  !!VR(result)&1:S(TRUE);
+!!en;
+
+!!if&(result);
+  !!re i/(SPELL_FIRST)/(SPELL_LAST_WOG);
+    !!if&(isLearning);
+      !!HE(hero)&i<>(SPELL_TITANS_LIGHTNING_BOLT):Mi/(TRUE);
+    !!el;
+      !!HE(hero):Mi/(FALSE);
+    !!en;
+  !!en;
+!!en;
+
+!!FU(trainer_RefreshSpellTable):Pi^trainer_spellTablePage^/(hero);
+!!SN:P^openbook.wav^;
 
 ***************************** END SPELLS ******************************
 
@@ -741,71 +608,47 @@ ZVSE2
 !!VR(hero:y):Si^trainer_hero^;
 !!VR(ss:y):Si^mouse_item^ -55;
 !!HE(hero):S(ss)/?(ssLv:y);
-!!SN&i^Advanced_Classes_Mod_Active^:Mi^acm_ssNames^/(ss)/?z10;
+!!VR(ssLvNew:y):S(SKILL_NOT_LEARNED);     [Initialization]
+
+!!if&i^Advanced_Classes_Mod_Active^;
+  !!SN:Mi^acm_ssNames^/(ss)/?z10;
+  !!VR(skillMasterOn:y):Si^H3_%z10_0_Hero%(hero)^;
+  !!VR(skillGrandMasterOn:y):Si^H3_%z10_1_Hero%(hero)^;
+!!en;
 
 ; Ctrl Click - increase skill level by 1
 !!if&i^key_ctrl^/i^key_shift^=(FALSE)/i^key_alt^=(FALSE);
-  !!VR(ssLvNew:y):S(ssLv) +1;
+  !!VR(ssLvNew)&(ssLv)=(SKILL_NOT_LEARNED):S(SKILL_BASIC);
+  !!VR(ssLvNew)&(ssLv)=(SKILL_BASIC):S(SKILL_ADVANCED);
+  !!VR(ssLvNew)|(ssLv)=(SKILL_ADVANCED)/(ssLv)=(SKILL_EXPERT):S(SKILL_EXPERT);
 
-  !!if&i^Advanced_Classes_Mod_Active^=(FALSE);
-    !!VR(ssLvNew)&(ssLvNew)=4:S(SKILL_NOT_LEARNED);
-  !!en;
-
-  !!if&(ssLvNew)=4/i^Advanced_Classes_Mod_Active^;
-    !!if&i^H3_%z10_0_Hero%(hero)^=(FALSE)/i^H3_%z10_1_Hero%(hero)^=(FALSE);
-      ; Set secondary skill to level 4/5 in order to compare if skill level was changed
-      ; The excessive level will be fixed later after playing sound
-      !!VR(ssLvNew):S4;
-      !!VRi^H3_%z10_0_Hero%(hero)^:S(TRUE);
-    !!el&i^H3_%z10_0_Hero%(hero)^/i^H3_%z10_1_Hero%(hero)^=(FALSE);
-      !!VR(ssLvNew):S5;
-      !!VRi^H3_%z10_1_Hero%(hero)^:S(TRUE);
-    !!el&i^H3_%z10_0_Hero%(hero)^/i^H3_%z10_1_Hero%(hero)^;
-      !!VR(ssLvNew):S(SKILL_NOT_LEARNED);
-      !!VRi^H3_%z10_0_Hero%(hero)^:S(FALSE);
-      !!VRi^H3_%z10_1_Hero%(hero)^:S(FALSE);
+  !!if&(ssLv)=(SKILL_EXPERT)/i^Advanced_Classes_Mod_Active^;
+    !!if&(skillMasterOn)=(FALSE)/(skillGrandMasterOn)=(FALSE);
+      !!VRi^H3_%z10_0_Hero%(hero)^:S(TRUE); [Give Master level]
+    !!el&(skillMasterOn)/(skillGrandMasterOn)=(FALSE);
+      !!VRi^H3_%z10_1_Hero%(hero)^:S(TRUE); [Give Grand Master Level]
     !!en;
   !!en;
 ; Shift Click - reduce skill level by 1
 !!el&i^key_ctrl^=(FALSE)/i^key_shift^/i^key_alt^=(FALSE);
-  !!if|(ssLv)=(SKILL_BASIC)/(ssLv)=(SKILL_ADVANCED);
-    !!VR(ssLvNew):S(ssLv) -1;
-  !!en;
+  !!VR(ssLvNew)|(ssLv)=(SKILL_NOT_LEARNED)/(ssLv)=(SKILL_BASIC):S(SKILL_NOT_LEARNED);
+  !!VR(ssLvNew)&(ssLv)=(SKILL_ADVANCED):S(SKILL_BASIC);
+  !!VR(ssLvNew)&(ssLv)=(SKILL_EXPERT):S(SKILL_ADVANCED);
 
-  !!if&i^Advanced_Classes_Mod_Active^=(FALSE);
-    !!if&(ssLv)=(SKILL_NOT_LEARNED);
+  !!if&(ssLv)=(SKILL_EXPERT)/i^Advanced_Classes_Mod_Active^;
+    !!if&(skillMasterOn)/(skillGrandMasterOn)=(FALSE);
       !!VR(ssLvNew):S(SKILL_EXPERT);
-    !!el&(ssLv)=(SKILL_EXPERT);
-      !!VR(ssLvNew):S(SKILL_ADVANCED);
-    !!en;
-  !!en;
-
-  !!if&i^Advanced_Classes_Mod_Active^;
-    !!if&(ssLv)=(SKILL_NOT_LEARNED);
-      !!VRi^H3_%z10_0_Hero%(hero)^:S(TRUE);
-      !!VRi^H3_%z10_1_Hero%(hero)^:S(TRUE);
-      !!VR(ssLvNew):S5;
-    !!el&(ssLv)=(SKILL_EXPERT);
-      !!if&i^H3_%z10_0_Hero%(hero)^/i^H3_%z10_1_Hero%(hero)^;
-        !!VRi^H3_%z10_1_Hero%(hero)^:S(FALSE);
-        !!VR(ssLvNew):S4;
-      !!el&i^H3_%z10_0_Hero%(hero)^/i^H3_%z10_1_Hero%(hero)^=(FALSE);
-        !!VRi^H3_%z10_0_Hero%(hero)^:S(FALSE);
-        !!VR(ssLv):S4;                  [fix origianl secondary skill level for playing sound]
-        !!VR(ssLvNew):S(SKILL_EXPERT);
-      !!el&i^H3_%z10_0_Hero%(hero)^=(FALSE)/i^H3_%z10_1_Hero%(hero)^=(FALSE);
-        !!VR(ssLvNew):S(SKILL_ADVANCED);
-      !!en;
+      !!VRi^H3_%z10_0_Hero%(hero)^:S(FALSE);
+    !!el&(skillMasterOn)/(skillGrandMasterOn);
+      !!VR(ssLvNew):S(SKILL_EXPERT);
+      !!VRi^H3_%z10_1_Hero%(hero)^:S(FALSE);
     !!en;
   !!en;
 ; Alt Click - Set sec skill level to max
 !!el&i^key_ctrl^=(FALSE)/i^key_shift^=(FALSE)/i^key_alt^;
-  !!if&i^Advanced_Classes_Mod_Active^=(FALSE);
-    !!VR(ssLvNew):S(SKILL_EXPERT);
-  !!en;
+  !!VR(ssLvNew):S(SKILL_EXPERT);
 
   !!if&i^Advanced_Classes_Mod_Active^;
-    !!VR(ssLvNew):S5;
     !!VRi^H3_%z10_0_Hero%(hero)^:S(TRUE);
     !!VRi^H3_%z10_1_Hero%(hero)^:S(TRUE);
   !!en;
@@ -813,51 +656,58 @@ ZVSE2
 ; LMB - dialogue for choosing levels of secondary skills
   !!if&i^Advanced_Classes_Mod_Active^=(FALSE);
     !!SN:H^secskill^/(ss)/(SKILL_NOT_LEARNED)/?z1;
-    !!VR(choice:y):S1 Sd<<3;              [default choice - expert]
+    !!VR(defaultChoice:y):S1 Sd<<3;            [default choice - expert]
   !!en;
 
-  !!if&i^Advanced_Classes_Mod_Active^;    [get master/grand master skill levels (ACM)]
+  !!if&i^Advanced_Classes_Mod_Active^;  [get master/grand master skill levels (ACM)]
     !!SN:T^trainer.acm.ss%(ss)^/?z1;
-
-    !!if&(ssLv)=(SKILL_EXPERT);
-      !!VR(ssLv)&i^H3_%z10_0_Hero%(hero)^/i^H3_%z10_1_Hero%(hero)^=(FALSE):S4;
-      !!VR(ssLv)&i^H3_%z10_0_Hero%(hero)^/i^H3_%z10_1_Hero%(hero)^:S5;
-    !!en;
-
-    !!VR(choice:y):S1 Sd<<5;              [default choice - grand master]
+    !!VR(defaultChoice):S1 Sd<<5;              [default choice - grand master]
   !!en;
 
   !!SN:T^trainer.titleSs^/?z2/^ss^/z1/^hero^/s^trainer_heroName^ T^trainer.notLearned^/?z3 T^trainer.basic^/?z4 T^trainer.advanced^/?z5 T^trainer.expert^/?z6 T^trainer.chgMind^/?z7;
 
   !!if&i^Advanced_Classes_Mod_Active^=(FALSE);
-    !!IF:G1/1/(choice)/2/3/4/5/6/7;
-    !!FU(IntLog2):Pv1/?(ssLvNew);
-    !!FU&(ssLvNew)=4:E;
+    !!IF:G1/1/(defaultChoice)/2/3/4/5/6/7;
+    !!FU(IntLog2):Pv1/?(choice:y);
+    !!FU&(choice)=4:E;
+
+    !!VR(ssLvNew):S(choice);
   !!en;
 
   !!if&i^Advanced_Classes_Mod_Active^;
     !!SN:T^trainer.acm.master^/?z8 T^trainer.acm.grandMaster^/?z9;
-    !!IF:G1/1/(choice)/2/3/4/5/6/8/9/7;
-    !!FU(IntLog2):Pv1/?(ssLvNew);
-    !!FU&(ssLvNew)=6:E;
+    !!IF:G1/1/(defaultChoice)/2/3/4/5/6/8/9/7;
+    !!FU(IntLog2):Pv1/?(choice);
+    !!FU&(choice)=6:E;
 
-    !!if&(ssLvNew)<=(SKILL_EXPERT);
+    !!if&(choice)<=3;
+      !!VR(ssLvNew):S(choice);
       !!VRi^H3_%z10_0_Hero%(hero)^:S(FALSE);
       !!VRi^H3_%z10_1_Hero%(hero)^:S(FALSE);
-    !!el&(ssLvNew)=4;                        [set up Master/Grand Master level of skills (ACM)]
+    !!el&(choice)=4;
+      !!VR(ssLvNew):S(SKILL_EXPERT);
       !!VRi^H3_%z10_0_Hero%(hero)^:S(TRUE);
       !!VRi^H3_%z10_1_Hero%(hero)^:S(FALSE);
-    !!el&(ssLvNew)>=5;
+    !!el&(choice)>=5;
+      !!VR(ssLvNew):S(SKILL_EXPERT);
       !!VRi^H3_%z10_0_Hero%(hero)^:S(TRUE);
       !!VRi^H3_%z10_1_Hero%(hero)^:S(TRUE);
     !!en;
   !!en;
 !!en;
 
-!!SN&(ssLv)<>(ssLvNew):P^NwHeroLv.wav^; [play sound if skill level was updated]
-!!VR(ssLvNew):F(SKILL_NOT_LEARNED)/(SKILL_EXPERT); [fix excessive skill levels]
-!!HE(hero):S(ss)/(ssLvNew);
-!!FU(trainer_SetSecSkillCadre):P(ss)/(ssLvNew);
+!!VR(ssLvChanged:y):S(FALSE);
+!!VR(ssLvChanged)&(ssLv)<>(ssLvNew):S(TRUE);
+
+!!if&i^Advanced_Classes_Mod_Active^;
+  !!VR(ssLvChanged)|(skillMasterOn)<>i^H3_%z10_0_Hero%(hero)^/(skillGrandMasterOn)<>i^H3_%z10_1_Hero%(hero)^:S(TRUE);
+!!en;
+
+!!if&(ssLvChanged);
+  !!HE(hero):S(ss)/(ssLvNew);
+  !!FU(trainer_SetSecSkillCadre):P(ss)/(ssLvNew);
+  !!SN:P^NwHeroLv.wav^;
+!!en;
 
 !?FU(OnCustomDialogEvent)&i^dlg_id^=(TRAINER_MAIN_DLG)/i^mouse_item^>=55/i^mouse_item^<=82/i^mouse_action^=(MOUSE_RMB_PRESSED);
 !!VR(ss:y):Si^mouse_item^ -55;
@@ -902,8 +752,9 @@ ZVSE2
     !!VR(ssCadInd):S(ss) +28;
   !!en;
 
-  !!DO(AC_Set_SS_Description)/(SEC_SKILL_FIRST)/(SEC_SKILL_LAST)/1:P(hero); [Set new Skill descriptions for ACM]
-  !!DO(AC_Set_SS_Names)/(SEC_SKILL_FIRST)/(SEC_SKILL_LAST)/1:P(hero);       [Set new Skill names for ACM]
+  ; Set new skill names and description of ACM skills (funciton is in ACM)
+  !!DO(AC_Set_SS_Description)/(SEC_SKILL_FIRST)/(SEC_SKILL_LAST)/1:P(hero);
+  !!DO(AC_Set_SS_Names)/(SEC_SKILL_FIRST)/(SEC_SKILL_LAST)/1:P(hero);
 !!en;
 
 !!DL(TRAINER_MAIN_DLG):A(ssHighlight)/(DLG_CMD_SET_DEF_FRAME)/(highlight)/1;
@@ -1049,7 +900,9 @@ ZVSE2
 !!VRz3:Ss^trainer_heroName^;
 
 !!SN:T^trainer.heroLvReset^/?z2/^hero^/z3;
-!!IF:Q1/(PIC_TYPE_EXPERIENCE)/0/(PIC_TYPE_PRIM_SKILL_FIRST)/0/(PIC_TYPE_SEC_SKILL)/3/2^%z2^;
+!!VR(randomPrimSkillPic:y):R0/31/34;
+!!VR(randomSecSkillPic:y):R0/(SEC_SKILL_FIRST)/(SEC_SKILL_LAST) *3 +3;
+!!IF:Q1/(PIC_TYPE_EXPERIENCE)/0/(randomPrimSkillPic)/0/(PIC_TYPE_SEC_SKILL)/(randomSecSkillPic)/2^%z2^;
 !!FU&-1:E;
 
 !!HE(hero):E0/1;
@@ -1108,37 +961,90 @@ ZVSE2
 !!SN:T^trainer.heroLvDesc^/?(heroLvDesc:z)/^lv^/(lv);
 !!IF:Q1/(PIC_TYPE_EXPERIENCE)/(exp)/4^%(heroLvDesc)^;
 
-!?FU(trainer_CalcExpWithLevel); Custom levels
-; x1 - level
-; x2 - exp
-!!UN:J1/?y1/d J1/12/?y2 J1/x1/?y3 J1/y1/?y4;
-!!VRx2:Sy3;
-!!FU&x1<=12:E;
+; Calculate the total exp needed for a specific hero level
+!?FU(trainer_CalcExpWithLevel);
+!#VA(targetLv:x) (exp:x);
 
-!!VRx2:Sy2;
-!!VRy4:S13;
-!!UN:J1/y4/?y5; #5
-!!VRx2:+y5;
-!!VRy4:+1;
-!!SN&y4<=x1:G5;
-!!UN:J1/y1/?y5;
+!!VR(exp):S0;
+
+!!if&(targetLv)<=12;
+  !!UN:J1/(targetLv)/?(exp);
+!!el;
+  !!re (level:y)/12/(targetLv);
+    !!UN:J1/(level)/?(expThisLv:y);
+    !!VR(exp):+(expThisLv);
+  !!en;
+!!en;
 
 ********************* End Hero Level *************************
 
 ********************* Primary Skills *************************
 ; Added support with Prima.dll
-!?FU(OnCustomDialogEvent)&i^dlg_id^=(TRAINER_MAIN_DLG)/i^mouse_item^>219/i^mouse_item^<228/i^mouse_action^=(MOUSE_LMB_RELEASED); buttons adding priщary skills
-!!VR(hero:y):Si^trainer_hero^;          [Archer - opimisation and compatiblity with prima.dll]
+!?FU(OnCustomDialogEvent)&i^dlg_id^=(TRAINER_MAIN_DLG)/i^mouse_item^>=220/i^mouse_item^<=227/i^mouse_action^=(MOUSE_LMB_RELEASED); [buttons adding priщary skills]
+!!VR(hero:y):Si^trainer_hero^;
 !!VR(item:y):Si^mouse_item^;
+!!VR(psCap:y):Si^trainer_primSkillCap^;
+!!HE(hero):F?(atk:y)/?(def:y)/?(pwr:y)/?(knl:y);
 
-!!HE(hero)&(item)=220:Fd1/d/d/d;
-!!HE(hero)&(item)=221:Fd/d1/d/d;
-!!HE(hero)&(item)=222:Fd/d/d/d1;
-!!HE(hero)&(item)=223:Fd/d/d1/d;
-!!HE(hero)&(item)=224:Fd-1/d/d/d;
-!!HE(hero)&(item)=225:Fd/d-1/d/d;
-!!HE(hero)&(item)=226:Fd/d/d/d-1;
-!!HE(hero)&(item)=227:Fd/d/d-1/d;
+!!if|(item)=220/(item)=224;
+  !!VR(psType:y):S(SKILL_ATTACK);
+!!el|(item)=221/(item)=225;
+  !!VR(psType):S(SKILL_DEFENSE);
+!!el|(item)=222/(item)=226;
+  !!VR(psType):S(SKILL_POWER);
+!!el|(item)=223/(item)=227;
+  !!VR(psType):S(SKILL_KNOWLEDGE);
+!!en;
+
+!!if|(psType)=(SKILL_ATTACK)/(psType)=(SKILL_DEFENSE);
+  !!VR(psMin:y):S0;
+!!el;
+  !!VR(psMin):S1;
+!!en;
+
+!!if&(item)=220;
+  !!VR(atkNew:y):S(atk) +1;
+  !!VR(atkNew)&(atk)>=(psCap):S(psCap);
+  !!VR(atkNew)&(atk)<(psMin):S(psMin);
+!!el&(item)=221;
+  !!VR(defNew:y):S(def) +1;
+  !!VR(defNew)&(def)>=(psCap):S(psCap);
+  !!VR(defNew)&(def)<(psMin):S(psMin);
+!!el&(item)=222;
+  !!VR(pwrNew:y):S(pwr) +1;
+  !!VR(pwrNew)&(pwr)>=(psCap):S(psCap);
+  !!VR(pwrNew)&(pwr)<(psMin):S(psMin);
+!!el&(item)=223;
+  !!VR(knlNew:y):S(knl) +1;
+  !!VR(knlNew)&(knl)>=(psCap):S(psCap);
+  !!VR(knlNew)&(knl)<(psMin):S(psMin);
+!!el&(item)=224;
+  !!VR(atkNew:y):S(atk) -1;
+  !!VR(atkNew)&(atk)<=(psMin):S(psMin);
+  !!VR(atkNew)&(atk)>(psCap):S(psCap);
+!!el&(item)=225;
+  !!VR(defNew:y):S(def) -1;
+  !!VR(defNew)&(def)<=(psMin):S(psMin);
+  !!VR(defNew)&(def)>(psCap):S(psCap);
+!!el&(item)=226;
+  !!VR(pwrNew:y):S(pwr) -1;
+  !!VR(pwrNew)&(pwr)<=(psMin):S(psMin);
+  !!VR(pwrNew)&(pwr)>(psCap):S(psCap);
+!!el&(item)=227;
+  !!VR(knlNew:y):S(knl) -1;
+  !!VR(knlNew)&(knl)<=(psMin):S(psMin);
+  !!VR(knlNew)&(knl)>(psCap):S(psCap);
+!!en;
+
+!!if&(psType)=(SKILL_ATTACK);
+  !!HE(hero):F(atkNew)/d/d/d;
+!!el&(psType)=(SKILL_DEFENSE);
+  !!HE(hero):Fd/(defNew)/d/d;
+!!el&(psType)=(SKILL_POWER);
+  !!HE(hero):Fd/d/(pwrNew)/d;
+!!el&(psType)=(SKILL_KNOWLEDGE);
+  !!HE(hero):Fd/d/d/(knlNew);
+!!en;
 
 !!FU(trainer_RefreshPrimSkills):P(hero);
 
@@ -1165,9 +1071,9 @@ ZVSE2
 
 !!DL(TRAINER_MAIN_DLG):A141/(DLG_CMD_SET_TEXT)/z16/1 A142/(DLG_CMD_SET_TEXT)/z17/1 A143/(DLG_CMD_SET_TEXT)/z18/1 A144/(DLG_CMD_SET_TEXT)/z19/1;
 
-; Show primary skills pop-ups
+; Show the hero's primary skills without artifact on right-clicking
 !?FU(OnCustomDialogEvent)&i^dlg_id^=(TRAINER_MAIN_DLG)/i^mouse_action^=(MOUSE_RMB_PRESSED);
-!!VR(flag:y):S(FALSE);                  [get clicked location]
+!!VR(flag:y):S(FALSE);
 
 !!if&i^mouse_item^>=15/i^mouse_item^<=18;
   !!VR(flag):S1;
@@ -1178,13 +1084,14 @@ ZVSE2
 !!FU&(flag)=(FALSE):E;
 
 !!if&(flag)=1;
-  !!VR(psType:y):Si^mouse_item^ -15; [get primary skill type and pic type]
+  !!VR(psType:y):Si^mouse_item^ -15;
 !!el&(flag)=2;
   !!VR(psType):Si^mouse_item^ -141;
 !!en;
 
 !!VR(psPicType:y):S(psType) +31;
 
+; Get the hero's primary skills withour artifacts
 !!FU(GetHeroPrimarySkillsWithoutArts):Pi^trainer_hero^/?(atk:y)/?(def:y)/?(pwr:y)/?(knl:y);
 
 !!if&(psType)=(SKILL_ATTACK);
@@ -1213,8 +1120,14 @@ ZVSE2
 
 !!FU&(flag)=(FALSE):E;
 
+; Initialise variabeles
 !!VR(hero:y):Si^trainer_hero^;
 !!VR(psCap:y):Si^trainer_primSkillCap^;
+
+!!VR(psBonus:y):S0;
+!!VR(psNew:y):S-1;
+!!VR(playSound:y):S(TRUE);
+
 !!HE(hero):F?(atk:y)/?(def:y)/?(pwr:y)/?(knl:y);
 
 ; Get the type of primary skills
@@ -1224,49 +1137,24 @@ ZVSE2
   !!VR(psType):Si^mouse_item^ -141;
 !!en;
 
-!!VR(playSound:y):S(TRUE);              [Initialise variable for playing sound]
+!!if|(psType)=(SKILL_ATTACK)/(psType)=(SKILL_DEFENSE);
+  !!VR(psMin:y):S0;
+!!el;
+  !!VR(psMin):S1;
+!!en;
+
 ; Ctrl Click - increase 10 primary skill points
 !!if&i^key_ctrl^/i^key_shift^=(FALSE)/i^key_alt^=(FALSE);
-  !!if&(psType)=(SKILL_ATTACK);
-    !!HE(hero):Fd10/d/d/d;
-  !!el&(psType)=(SKILL_DEFENSE);
-    !!HE(hero):Fd/d10/d/d;
-  !!el&(psType)=(SKILL_POWER);
-    !!HE(hero):Fd/d/d10/d;
-  !!el&(psType)=(SKILL_KNOWLEDGE);
-    !!HE(hero):Fd/d/d/d10;
-  !!en;
+  !!VR(psBonus):S10;
 ; Shift Click - decrease 10 primary skill points
 !!el&i^key_ctrl^=(FALSE)/i^key_shift^/i^key_alt^=(FALSE);
-  !!if&(psType)=(SKILL_ATTACK);
-    !!HE(hero):Fd-10/d/d/d;
-  !!el&(psType)=(SKILL_DEFENSE);
-    !!HE(hero):Fd/d-10/d/d;
-  !!el&(psType)=(SKILL_POWER);
-    !!HE(hero):Fd/d/d-10/d;
-  !!el&(psType)=(SKILL_KNOWLEDGE);
-    !!HE(hero):Fd/d/d/d-10;
-  !!en;
+  !!VR(psBonus:y):S-10;
 ; Alt Click - set primary skill to max
 !!el&i^key_ctrl^=(FALSE)/i^key_shift^=(FALSE)/i^key_alt^;
-  !!if&(psType)=(SKILL_ATTACK);
-    !!HE(hero):F(psCap)/d/d/d;
-  !!el&(psType)=(SKILL_DEFENSE);
-    !!HE(hero):Fd/(psCap)/d/d;
-  !!el&(psType)=(SKILL_POWER);
-    !!HE(hero):Fd/d/(psCap)/d;
-  !!el&(psType)=(SKILL_KNOWLEDGE);
-    !!HE(hero):Fd/d/d/(psCap);
-  !!en;
+  !!VR(psNew):S(psCap);
 ; LMB- Dialogue for input needed Primary skill value
 !!el;
   !!FU(trainer_GetTxtFileString):P^priskill.txt^/(psType)/?z2;
-
-  !!if|(psType)=(SKILL_ATTACK)/(psType)=(SKILL_DEFENSE);
-    !!VR(psMin:y):S0;
-  !!el;
-    !!VR(psMin):S1;
-  !!en;
 
   !!SN:T^trainer.titlePs^/?z4/^ps^/z2/^hero^/s^trainer_heroName^ T^trainer.legendPs^/?z5/^ps^/z2/^min^/(psMin)/^max^/(psCap);
   !!IF:D30/4/5/^^;              [get primary skill value input]
@@ -1274,26 +1162,32 @@ ZVSE2
   !!VRz1:H1;
   !!FU|-1/v1<0:E;
 
-  !!VR(psValue:y):Vz1;
-
-  !!if|(psType)=(SKILL_ATTACK)/(psType)=(SKILL_DEFENSE);
-    !!VR(psValue:y):F0/(psCap);
-  !!el;
-    !!VR(psValue):F1/(psCap);
-  !!en;
-
-  ; Set new primary skill values
-  !!if&(psType)=(SKILL_ATTACK);
-    !!HE(hero):F(psValue)/d/d/d;
-  !!el&(psType)=(SKILL_DEFENSE);
-    !!HE(hero):Fd/(psValue)/d/d;
-  !!el&(psType)=(SKILL_POWER);
-    !!HE(hero):Fd/d/(psValue)/d;
-  !!el&(psType)=(SKILL_KNOWLEDGE);
-    !!HE(hero):Fd/d/d/(psValue);
-  !!en;
-
+  !!VR(psNew:y):Vz1;
   !!VR(playSound):S(FALSE);
+!!en;
+
+!!if&(psBonus)<>0;
+  !!if&(psType)=(SKILL_ATTACK);
+    !!VR(psNew):S(atk) +(psBonus);
+  !!el&(psType)=(SKILL_DEFENSE);
+    !!VR(psNew):S(def) +(psBonus);
+  !!el&(psType)=(SKILL_POWER);
+    !!VR(psNew):S(pwr) +(psBonus);
+  !!el&(psType)=(SKILL_KNOWLEDGE);
+    !!VR(psNew):S(knl) +(psBonus);
+  !!en;
+!!en;
+
+!!VR(psNew):F(psMin)/(psCap);
+
+!!if&(psType)=(SKILL_ATTACK);
+  !!HE(hero):F(psNew)/d/d/d;
+!!el&(psType)=(SKILL_DEFENSE);
+  !!HE(hero):Fd/(psNew)/d/d;
+!!el&(psType)=(SKILL_POWER);
+  !!HE(hero):Fd/d/(psNew)/d;
+!!el&(psType)=(SKILL_KNOWLEDGE);
+  !!HE(hero):Fd/d/d/(psNew);
 !!en;
 
 !!HE(hero):F?(atkNew:y)/?(defNew:y)/?(pwrNew:y)/?(knlNew:y);
@@ -1575,7 +1469,7 @@ ZVSE2
 !!FU|-1/v1<0:E;                         [end function if empty or Esc]
 
 !!VR(mon:y):Vz1;
-!!FU(trainer_CheckZ1FirstCharacterIsNum):P?(result:y);
+!!FU(trainer_CheckIFZ1FirstCharIsNum):P?(result:y);
 
 !!if&(result)/(mon)>=(MON_FIRST)/(mon)<=(lastMon);
   !!FU(trainer_AddMonInputQty):P(mon);
@@ -1617,9 +1511,7 @@ ZVSE2
 ; 526-540 artifacts graphics
 ; 426-440 artifacts cadres
 !?FU(trainer_RefreshArtTable);
-!#VA(page:x);
-
-!!VR(hero:y):Si^trainer_hero^;
+!#VA(page:x) (hero:x);
 
 !!re (item:y)/526/540;
   !!FU(trainer_GetArtOfTheTable):P(page)/(item)/?(art:y);
@@ -1674,7 +1566,7 @@ ZVSE2
   !!VR(pageNew):S0;
 !!en;
 
-!!FU(trainer_RefreshArtTable):P(pageNew);
+!!FU(trainer_RefreshArtTable):P(pageNew)/i^trainer_hero^;
 !!VRi^trainer_artTablePage^:S(pageNew);
 
 ; arts button left
@@ -1688,7 +1580,7 @@ ZVSE2
   !!VR(pageNew):S(page) -1;
 !!en;
 
-!!FU(trainer_RefreshArtTable):P(pageNew);
+!!FU(trainer_RefreshArtTable):P(pageNew)/i^trainer_hero^;
 !!VRi^trainer_artTablePage^:S(pageNew);
 
 ; Click to give artifacts to the hero
@@ -1754,7 +1646,7 @@ ZVSE2
 
 !!VR(art:y):Vz1;
 
-!!FU(trainer_CheckZ1FirstCharacterIsNum):P?(result:y);
+!!FU(trainer_CheckIFZ1FirstCharIsNum):P?(result:y);
 
 ; Add in artifact with ID if the first character is a number
 !!if&(result)/(art)>=(ART_FIRST)/(art)<=(lastArt);
@@ -1798,7 +1690,7 @@ ZVSE2
 !!FU|-1/v1<0:E;                         [end function if empty or Esc]
 
 !!VR(spell:y):Vz1;
-!!FU(trainer_CheckZ1FirstCharacterIsNum):P?(result:y);
+!!FU(trainer_CheckIFZ1FirstCharIsNum):P?(result:y);
 
 !!if&(result)/(spell)>=(SPELL_FIRST)/(spell)<=(SPELL_LAST_WOG);
   !!VR(art:y):S(spell) +1001;
@@ -1821,7 +1713,7 @@ ZVSE2
 !#VA(hero:x) (art:x);
 
 !!HE(hero):A4/(art);
-!!FU(trainer_RefreshArtTable):Pi^trainer_artTablePage^;
+!!FU(trainer_RefreshArtTable):Pi^trainer_artTablePage^/(hero);
 !!FU(trainer_ShowArtDesc)&(art)<1000:P(art);
 !!FU(trainer_PlayArtSound):P;
 
@@ -1834,7 +1726,7 @@ ZVSE2
 
 ******************** Give movement, mana and reveal map ********************
 ; Movement
-!?FU(OnCustomDialogEvent)&i^dlg_id^=(TRAINER_MAIN_DLG)/i^mouse_item^=32/i^mouse_action^=(MOUSE_LMB_RELEASED);
+!?FU(OnCustomDialogEvent)&i^dlg_id^=(TRAINER_MAIN_DLG)/i^mouse_item^=31/i^mouse_action^=(MOUSE_LMB_RELEASED);
 !!VR(hero:y):Si^trainer_hero^;
 !!HE(hero):W?(movement:y)/(TRUE);
 
@@ -1871,9 +1763,7 @@ ZVSE2
 !!en;
 
 ; Show current movement points
-!?FU(OnCustomDialogEvent)&i^dlg_id^=(TRAINER_MAIN_DLG)/i^mouse_action^=(MOUSE_RMB_PRESSED);
-!!FU&i^mouse_item^<>30/i^mouse_item^<>32:E;
-
+!?FU(OnCustomDialogEvent)&i^dlg_id^=(TRAINER_MAIN_DLG)/i^mouse_item^>=30/i^mouse_item^<=31/i^mouse_action^=(MOUSE_RMB_PRESSED);
 !!VR(hero:y):Si^trainer_hero^;
 !!HE(hero):W?(movement:y)/(TRUE);
 !!SN:T^trainer.currMovement^/?(currMoveStr:z)/^hero^/s^trainer_heroName^ T^trainer.movePoints^/?(movePoints:z)/^movement^/(movement) H^art^/(ART_BOOTS_OF_SPEED)/0/^%(movePoints)^;
@@ -1919,9 +1809,7 @@ ZVSE2
 !!en;
 
 ; Show current mana
-!?FU(OnCustomDialogEvent)&i^dlg_id^=(TRAINER_MAIN_DLG)/i^mouse_action^=(MOUSE_RMB_PRESSED);
-!!FU&i^mouse_item^<>31/i^mouse_item^<>33:E;
-
+!?FU(OnCustomDialogEvent)&i^dlg_id^=(TRAINER_MAIN_DLG)/i^mouse_item^>=32/i^mouse_item^<=33/i^mouse_action^=(MOUSE_RMB_PRESSED);
 !!VR(hero:y):Si^trainer_hero^;
 !!HE(hero):I?(mana:y)/(TRUE);
 !!SN:T^trainer.currMana^/?(currManaStr:z)/^hero^/s^trainer_heroName^;
@@ -1957,15 +1845,15 @@ ZVSE2
 ******************* Give any rank to the creatures **************************
 ; Stack experience
 !?FU(OnCustomDialogEvent)&i^dlg_id^=(TRAINER_MAIN_DLG)/i^mouse_item^>153/i^mouse_item^<161/i^mouse_action^=(MOUSE_LMB_RELEASED);
-!!UN:P(WOG_OPT_STACK_EXPERIENCE)/?(stackExpOn:y); check if stack exp enabled
+!!UN:P(WOG_OPT_STACK_EXPERIENCE)/?(stackExpOn:y); [Check if stack exp enabled]
 
 !!if&(stackExpOn)=(FALSE);
   !!IF:M^%T(trainer.rankOff)^;
   !!FU:E;
 !!en;
 
-!!SN:W^trainer_hero^/?(hero:y);
-!!VR(slot:y):Si^mouse_item^ -154;       [get hero slot]
+!!VR(hero:y):Si^trainer_hero^;
+!!VR(slot:y):Si^mouse_item^ -154;       [Get hero slot]
 !!HE(hero):C0/(slot)/?(mon:y)/?(qty:y)/?(stackExp:y);
 
 !!if&(mon)<=(NO_MON);
@@ -1975,34 +1863,43 @@ ZVSE2
 
 !!FU(trainer_GetMonRank):P(mon)/(stackExp)/?(rank:y);
 
-!!if&(qty)<=1;
-  !!SN:H^monname^/(mon)/0/?z6;
+; Ctrl Click - increase the rank of the creature by 1
+!!if&i^key_ctrl^/i^key_shift^=(FALSE)/i^key_alt^=(FALSE);
+  !!VR(rankNew:y):S(rank) +1;
+; Shift Click - Decrease the rank of the creature by 1
+!!el&i^key_ctrl^=(FALSE)/i^key_shift^/i^key_alt^=(FALSE);
+  !!VR(rankNew:y):S(rank) -1;
+; Alt Click - Set the rank of the creature as 11
+!!el&i^key_ctrl^=(FALSE)/i^key_shift^=(FALSE)/i^key_alt^;
+  !!VR(rankNew:y):S11;
+; LMB - dialogue for changing the rank of creature
 !!el;
-  !!SN:H^monname^/(mon)/1/?z6;
+  !!if&(qty)<=1;
+    !!SN:H^monname^/(mon)/0/?z6;
+  !!el;
+    !!SN:H^monname^/(mon)/1/?z6;
+  !!en;
+
+  !!SN:T^trainer.titleRank^/?z4/^mon^/z6 T^trainer.legendRank^/?z5;
+  !!IF:D30/4/5/^^;                        [Set to any rank]
+  !!IF:E1/30;                             [1 = index of v, 30 = number of extended dialog]
+  !!VRz1:H1;                              [check if text entered, flag 1=1 if yes]
+  !!FU|-1/v1<0:E;
+
+  !!VR(rankNew):Vz1;
 !!en;
 
-!!SN:T^trainer.titleRank^/?z4/^mon^/z6 T^trainer.legendRank^/?z5;
-!!IF:D30/4/5/^^;                        [Set to any rank]
-!!IF:E1/30;                             [1 = index of v, 30 = number of extended dialog]
-!!VRz1:H1;                              [check if text entered, flag 1=1 if yes]
-!!FU|-1/v1<0:E;
-
-!!VR(rankNew:y):Vz1;
 !!VR(rankNew):F0/11;
+!!HE(hero):C0/(slot)/(mon)/(qty)/(rankNew)/12; [12 - mode for setting rank]
 
-!!if&(mon)<=(BITS_8_MASK);
-  !!HE(hero):C0/(slot)/(mon)/(qty)/(rankNew)/12; [12 - mode for setting rank]
-!!el;
-  !!SN:E7503792/1/(mon)/(rankNew)/0;    [Hawaiing - export exp required for particualr creature/rank]
-  !!HE(hero):C0/(slot)/(mon)/(qty)/v1/2;[2 - mode for setting stack exp]
+!!if&(rank)<>(rankNew);
+  !!VR(hintCad:y):S(slot) +400;           [get item ID]
+  !!FU(trainer_RefreshRank):P(rankNew)/(hintCad);
+
+  !!SN:P^recruit.wav^;
 !!en;
 
-!!VR(hintCad:y):S(slot) +400;           [get item ID]
-!!FU(trainer_RefreshRank):P(rankNew)/(hintCad);
-
-!!SN&(rank)<>(rankNew):P^recruit.wav^;
-
-**************************** end experience ********************************
+**************************** End experience ********************************
 
 ************************ Change creature quantity **************************
 ; Manage the quantity of creatures in the hero's army
@@ -2094,6 +1991,7 @@ ZVSE2
   !!SN&(playSound):P^button.wav^;
 !!en;
 
+; Show creature info by right-clicking on the hero's army slots
 !?FU(OnCustomDialogEvent)&i^dlg_id^=(TRAINER_MAIN_DLG)/i^mouse_action^=(MOUSE_RMB_PRESSED);
 !!VR(flag:y):S(FALSE);
 
@@ -2115,9 +2013,9 @@ ZVSE2
   !!VR(slot):Si^mouse_item^ -400;
 !!en;
 
-!!FU(trainer_RMBMonInfo):P0/i^trainer_hero^/(slot)/0/1;
+!!FU(trainer_ShowMonInfo):P0/i^trainer_hero^/(slot)/0/1;
 
-!?FU(trainer_RMBMonInfo); OPEN CREATURE FROM HERO SLOT WINDOW
+!?FU(trainer_ShowMonInfo); OPEN CREATURE FROM HERO SLOT WINDOW
 ; Master Of Puppets
 ; Convention - thiscall
 ; x1 = 0
@@ -2256,9 +2154,6 @@ ZVSE2
 !!if&(lv)<5;
   !!CO(cmd):S(ps)/d1; set bonus
   !!CO(cmd)&(ps)=4:S6/d1;  set magic resistance
-!!el;
-  !!CO(cmd):S(ps)/(SKILL_NOT_LEARNED);
-  !!CO(cmd)&(ps)=4:S6/(SKILL_NOT_LEARNED);
 !!en;
 
 !!CO(cmd):S(ps)/?(lvNew:y);
@@ -2274,9 +2169,6 @@ ZVSE2
 !!if&(lv)>(SKILL_NOT_LEARNED);
   !!CO(cmd):S(ps)/d-1; set bonus
   !!CO(cmd)&(ps)=4:S6/d-1;  set magic resistance
-!!el;
-  !!CO(cmd):S(ps)/d5;
-  !!CO(cmd)&(ps)=4:S6/5;
 !!en;
 
 !!CO(cmd):S(ps)/?(lvNew:y);
@@ -2291,17 +2183,11 @@ ZVSE2
   !!if&(lv)<5;
     !!CO(cmd):S(ps)/d1;
     !!CO(cmd)&(ps)=4:S6/d1;
-  !!el;
-    !!CO(cmd):S(ps)/(SKILL_NOT_LEARNED);
-    !!CO(cmd)&(ps)=4:S6/(SKILL_NOT_LEARNED);
   !!en;
 !!el&i^key_ctrl^=(FALSE)/i^key_shift^/i^key_alt^=(FALSE);
   !!if&(lv)>(SKILL_NOT_LEARNED);
     !!CO(cmd):S(ps)/d-1;
     !!CO(cmd)&(ps)=4:S6/d-1;
-  !!el;
-    !!CO(cmd):S(ps)/d5;
-    !!CO(cmd)&(ps)=4:S6/d5;
   !!en;
 !!el&i^key_ctrl^=(FALSE)/i^key_shift^=(FALSE)/i^key_alt^;
   !!CO(cmd):S(ps)/5;
@@ -2316,15 +2202,17 @@ ZVSE2
 
 ; Change commander
 !?FU(OnCustomDialogEvent)&i^dlg_id^=551/i^mouse_item^>30/i^mouse_item^<40/i^mouse_action^=(MOUSE_LMB_PRESSED);
-!!SN:W^trainer_hero^/?y1;
-!!COy1:T?y2;
-!!VRy3:Si^mouse_item^-31; get type ID
-!!DL(TRAINER_CMD_DLG):A13/(DLG_CMD_SET_DEF_FRAME)/y3/1; set new commander in item 13
-!!DL(TRAINER_CMD_DLG):Ai^mouse_item^/(DLG_CMD_SET_DEF_FRAME)/9/1;
-!!COy1:Ty3;
-!!FU(trainer_RefreshCommanders):Py3;
+!!VR(cmd:y):Si^trainer_hero^;
+!!CO(cmd):T?(type:y);
+!!VR(typeNew:y):Si^mouse_item^-31;      [get type ID]
 
-!!SN&y2<>y3:P^trn_quest.wav^;
+!!if&(type)<>(typeNew);
+  !!DL(TRAINER_CMD_DLG):A13/(DLG_CMD_SET_DEF_FRAME)/(typeNew)/1; [set new commander in item 13]
+  !!DL(TRAINER_CMD_DLG):Ai^mouse_item^/(DLG_CMD_SET_DEF_FRAME)/9/1;
+  !!CO(cmd):T(typeNew);
+  !!FU(trainer_RefreshCommanders):P(typeNew);
+  !!SN:P^trn_quest.wav^;
+!!en;
 
 ; Give artifact to the commander
 !?FU(OnCustomDialogEvent)&i^dlg_id^=(TRAINER_CMD_DLG)/i^mouse_item^>=70/i^mouse_item^<=79/i^mouse_action^=(MOUSE_LMB_PRESSED);
@@ -2439,11 +2327,11 @@ ZVSE2
   !!IF:Q1/(PIC_TYPE_SPELL)/(SPELL_COUNTERSTRIKE)/4^%(cmdDesc)^;
 !!en;
 
-; Close the commander dialogue
+; Close the commander trainer dialogue
 !?FU(OnCustomDialogEvent)&i^dlg_id^=(TRAINER_CMD_DLG)/i^mouse_item^=12/i^mouse_action^=(MOUSE_LMB_RELEASED);
 !!DL(TRAINER_CMD_DLG):C1;
 
-; Show commander dialogue
+; Show commander screen
 !?FU(OnCustomDialogEvent)&i^dlg_id^=(TRAINER_CMD_DLG)/i^mouse_item^=28/i^mouse_action^=(MOUSE_RMB_PRESSED);
 !!FU(trainer_ShowCommanderScreen):Pi^trainer_hero^/0/1/?y1;
 
@@ -2490,15 +2378,16 @@ ZVSE2
 !!DL(TRAINER_CMD_DLG):A123/(DLG_CMD_SET_TEXT)/z33/1;                   [Do not change z33!]
 
 !?FU(trainer_ShowCommanderScreen);
-; x1 - hero ID
-; x2 - type of dialogue, 0 for normal type, 1 for upgrade
-; x3 - Dismmiss commander button, 0 for yep, 1 for nah
-; x4 - return value, 0 for commander alive, 1 for dead
-!!VRy1:Sv1;
-!!VRx1:*296+42344640;
-!!SN:E7775342/2/x1/x2/x3/0 E7812840/1/42337496;
-!!VRx4:Sv1;
-!!VRv1:Sy1;
+!#VA(cmd:x);                            [Commander ID]
+!#VA(typeOfDlg:x);                      [Type of dialogue, 0 for normal type, 1 for upgrade]
+!#VA(showDismissBtn:x);                 [Dismmiss commander button, 0 for showing, 1 for hidden]
+!#VA(isDead:x);                         [Returned value, 0 for commander alive, 1 for dead]
+
+!!VR(storedV1:y):Sv1;
+!!VR(cmd):*296 +42344640;
+!!SN:E7775342/2/(cmd)/(typeOfDlg)/(showDismissBtn)/0 E7812840/1/42337496;
+!!VR(isDead):Sv1;
+!!VRv1:S(storedV1);
 
 **** End Commander ****
 

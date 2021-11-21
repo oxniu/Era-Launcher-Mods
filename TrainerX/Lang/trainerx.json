@@ -12,10 +12,8 @@
     "titleMain":  "Trainer: Set any hero/player properties",
     "legendMain": "Enter the hero's name or number (leave empty for heroes of current player).",
 
-    "forgAllSpl": "Do you want @hero@ to forget all the spells?",
-    "splLearned": "@hero@ has already learned @spell@.",
-    "splLearns":  "@hero@ learns @spell@.",
-    "comma":  ", ",
+    "learnAllSp":  "Do you wish to teach @hero@ all the spells?",
+    "forgetAllSp": "Do you wish @hero@ to forget all the spells?",
 
     "titleSs": "Select @ss@ level for @hero@.",
     "notLearned": "Not Learned",

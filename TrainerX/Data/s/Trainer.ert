@@ -12,11 +12,11 @@ Clicking on the eye button will remove all spells from the hero.
 
 {~Cyan}Increase creatures number{~}:use the arrow buttons then enter the value you wish.
 
-{~Cyan}Get resources{~}: left click on the resources graphics to display box, then enter the new value.
+{~Cyan}Get resources{~}: left click on the resources graphics to display a dialogue, then enter the new value.
 
 {~Cyan}Give primary skills{~}: click on the various buttons.
 
-{~Cyan}Change Level{~}: click on experience button to increase hero's level (max is 868). He will level up as soon as you close the dialog. If you click on experience icon, you can choose to reset all levels and forget all skills.
+{~Cyan}Change Level{~}: click on experience button to change the hero's level. He will level up as soon as you close the dialog. If you click on experience icon, you can choose to reset all levels and forget all skills.
 
 {~Cyan}Reveal map{~}: click on the spyglass button.
 
@@ -24,4 +24,4 @@ Clicking on the eye button will remove all spells from the hero.
 
 {~Cyan}Give mana{~}: click on corresponding button.
 
-{~Cyan}Commander screen{~}: you can change the type of commander, change the commander's primary skills (up to grand master) and artifacts.",
+{~Cyan}Commander screen{~}: you can change the type of commander, change the commander's primary skills and artifacts.",
