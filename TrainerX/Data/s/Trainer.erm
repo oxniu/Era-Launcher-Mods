@@ -20,10 +20,10 @@ ZVSE2
 !#VA(player:x);
 
 !!re i/(PLAYER_FIRST)/(PLAYER_LAST);
-  !!OW:Ii/?(controller:y);
+  !!OW:Ii/?(isAi:y);
 
-  !!VR(player)&(controller)=0:Si;
-  !!br&(controller)=0;
+  !!VR(player)&(isAi)<>(TRUE):Si;
+  !!br&(isAi)<>(TRUE);
 !!en;
 
 !?FU(OnKeyPressed_AdvMap)&i^key^=(KEY_F2)/999;
@@ -57,7 +57,7 @@ ZVSE2
 !#VA(isWrongName:x);
 
 !!VRz1:Ss^trainer_input^;
-!!FU(trainer_CheckIFZ1FirstCharIsNum):P?(result:y);
+!!FU(trainer_CheckZ1FirstCharIsNum):P?(result:y);
 !!VR(hero:y)&(result):Vz1;
 
 !!if&(result)/(hero)>(NO_HERO)/(hero)<=(HERO_LAST_WOG);  [doesn't support extended hero id]
@@ -207,7 +207,7 @@ ZVSE2
   !!VR(moveCadre):S25;
 !!en;
 
-!!DL(TRAINER_MAIN_DLG):A30/(DLG_CMD_SET_DEF_FRAME)/(moveCadre)/1;
+!!DL(TRAINER_MAIN_DLG):A30/(DLG_CMD_SET_DEF_FRAME)/(moveCadre);
 
 !?FU(trainer_RefreshManaBar);
 !#VA(hero:x);
@@ -226,7 +226,7 @@ ZVSE2
   !!VR(manaCadre):S25;
 !!en;
 
-!!DL(TRAINER_MAIN_DLG):A32/(DLG_CMD_SET_DEF_FRAME)/(manaCadre)/1;
+!!DL(TRAINER_MAIN_DLG):A32/(DLG_CMD_SET_DEF_FRAME)/(manaCadre);
 
 !?FU(trainer_GetHeroPortrait);          [by igrik/Algor]
 !#VA(hero:x);                           [hero's number (0..155)]
@@ -370,7 +370,7 @@ ZVSE2
   !!en;
 !!en;
 
-!?FU(trainer_CheckIFZ1FirstCharIsNum);[Hawaiing]
+!?FU(trainer_CheckZ1FirstCharIsNum);[Hawaiing]
 !#VA(result:x);
 
 !!VR(result):S(FALSE);
@@ -471,11 +471,11 @@ ZVSE2
 
   !!VR(highlight:y):S(arrayIndex) +196;
 
-  !!DL(TRAINER_MAIN_DLG):A(item)/(DLG_CMD_SET_DEF_FRAME)/(cadre)/1;
-  !!DL(TRAINER_MAIN_DLG):A(highlight)/(DLG_CMD_SET_DEF_FRAME)/(spellLearned)/1;
+  !!DL(TRAINER_MAIN_DLG):A(item)/(DLG_CMD_SET_DEF_FRAME)/(cadre);
+  !!DL(TRAINER_MAIN_DLG):A(highlight)/(DLG_CMD_SET_DEF_FRAME)/(spellLearned);
 !!en;
 
-!!DL(TRAINER_MAIN_DLG):A11/(DLG_CMD_SET_DEF_FRAME)/(page)/1; [School icon]
+!!DL(TRAINER_MAIN_DLG):A11/(DLG_CMD_SET_DEF_FRAME)/(page); [School icon]
 
 ; Right button for the next page
 !?FU(OnCustomDialogEvent)&i^dlg_id^=(TRAINER_MAIN_DLG)/i^mouse_item^=14/i^mouse_action^=(MOUSE_LMB_RELEASED);
@@ -520,7 +520,7 @@ ZVSE2
 ; Forget the selected spell if learned, otherwise learn it
 !!if&1;
   !!HE(hero):M(spell)/(FALSE);
-  !!DL(TRAINER_MAIN_DLG):Ai^mouse_item^/(DLG_CMD_SET_DEF_FRAME)/(FALSE)/1;
+  !!DL(TRAINER_MAIN_DLG):Ai^mouse_item^/(DLG_CMD_SET_DEF_FRAME)/(FALSE);
   !!FU(trainer_UpdateSpellBook):P(hero);
 !!el;
   ; Give the hero a spell book when adding a spell. Don't show again if ingored.
@@ -541,7 +541,7 @@ ZVSE2
   !!en;
 
   !!HE(hero):M(spell)/(TRUE);
-  !!DL(TRAINER_MAIN_DLG):Ai^mouse_item^/(DLG_CMD_SET_DEF_FRAME)/(TRUE)/1;
+  !!DL(TRAINER_MAIN_DLG):Ai^mouse_item^/(DLG_CMD_SET_DEF_FRAME)/(TRUE);
 !!en;
 
 !!SN&(dialogueShown)=(FALSE):P^button.wav^;
@@ -805,8 +805,8 @@ ZVSE2
   !!DO(AC_Set_SS_Names)/(SEC_SKILL_FIRST)/(SEC_SKILL_LAST)/1:P(hero);
 !!en;
 
-!!DL(TRAINER_MAIN_DLG):A(ssHighlight)/(DLG_CMD_SET_DEF_FRAME)/(highlight)/1;
-!!DL(TRAINER_MAIN_DLG):A(ssItem)/(DLG_CMD_SET_DEF_FRAME)/(ssCadInd)/1;
+!!DL(TRAINER_MAIN_DLG):A(ssHighlight)/(DLG_CMD_SET_DEF_FRAME)/(highlight);
+!!DL(TRAINER_MAIN_DLG):A(ssItem)/(DLG_CMD_SET_DEF_FRAME)/(ssCadInd);
 
 ***************** End Secondary Skills *****************
 
@@ -1298,7 +1298,7 @@ ZVSE2
     !!DL(TRAINER_MAIN_DLG):H(swordCad)/z30;
   !!el;
     !!VR(monCadInd:y):S(mon) +2;
-    !!DL(TRAINER_MAIN_DLG):A(monCad)/(DLG_CMD_SET_DEF_FRAME)/(monCadInd)/1;
+    !!DL(TRAINER_MAIN_DLG):A(monCad)/(DLG_CMD_SET_DEF_FRAME)/(monCadInd);
 
     !!VRz3:M3/(qty);
     !!DL(TRAINER_MAIN_DLG):A(hintCad)/(DLG_CMD_SET_TEXT)/z3/1;
@@ -1516,7 +1516,7 @@ ZVSE2
 !!FU|-1/v1<0:E;                         [end function if empty or Esc]
 
 !!VR(mon:y):Vz1;
-!!FU(trainer_CheckIFZ1FirstCharIsNum):P?(result:y);
+!!FU(trainer_CheckZ1FirstCharIsNum):P?(result:y);
 
 !!if&(result)/(mon)>=(MON_FIRST)/(mon)<=(lastMon);
   !!FU(trainer_AddMonInputQty):P(mon);
@@ -1719,7 +1719,7 @@ ZVSE2
 
 !!VR(art:y):Vz1;
 
-!!FU(trainer_CheckIFZ1FirstCharIsNum):P?(result:y);
+!!FU(trainer_CheckZ1FirstCharIsNum):P?(result:y);
 
 ; Add in artifact with ID if the first character is a number
 !!if&(result)/(art)>=(ART_FIRST)/(art)<=(lastArt);
@@ -1765,7 +1765,7 @@ ZVSE2
 !!FU|-1/v1<0:E;                         [end function if empty or Esc]
 
 !!VR(spell:y):Vz1;
-!!FU(trainer_CheckIFZ1FirstCharIsNum):P?(result:y);
+!!FU(trainer_CheckZ1FirstCharIsNum):P?(result:y);
 
 !!if&(result)/(spell)>=(SPELL_FIRST)/(spell)<=(SPELL_LAST_WOG);
   !!VR(art:y):S(spell) +1001;
@@ -2143,7 +2143,7 @@ ZVSE2
 !!FU(trainer_RefreshCommanderArts):P(cmd);
 !!FU(trainer_RefreshCommanders):P(type);
 
-!!DL(TRAINER_CMD_DLG):A13/(DLG_CMD_SET_DEF_FRAME)/(type)/1; set correct commander to display
+!!DL(TRAINER_CMD_DLG):A13/(DLG_CMD_SET_DEF_FRAME)/(type); [set correct commander to display]
 
 !!CO(cmd):X2/?(lv:y);
 !!VRi^trainer_cmdLv^:S(lv);
@@ -2159,11 +2159,11 @@ ZVSE2
   ; Set primary skill icons
   !!VR(iconCadre:y):S(primSkill) *6 +(level);
   !!VR(iconItem:y):S(primSkill) +4;
-  !!DL(TRAINER_CMD_DLG):A(iconItem)/(DLG_CMD_SET_DEF_FRAME)/(iconCadre:y)/1;
+  !!DL(TRAINER_CMD_DLG):A(iconItem)/(DLG_CMD_SET_DEF_FRAME)/(iconCadre:y);
   ; Set primary skill level bars
   !!VR(barCadre:y):S(level);
   !!VR(barItem:y):S(primSkill) +40;
-  !!DL(TRAINER_CMD_DLG):A(barItem)/(DLG_CMD_SET_DEF_FRAME)/(barCadre:y)/1;
+  !!DL(TRAINER_CMD_DLG):A(barItem)/(DLG_CMD_SET_DEF_FRAME)/(barCadre:y);
 !!en;
 
 !?FU(trainer_RefreshCommanders);
@@ -2173,7 +2173,7 @@ ZVSE2
 
 ; Set up all 9 commander portraits
 !!re (item:y)/31/39;
-  !!DL(TRAINER_CMD_DLG):A(item)/(DLG_CMD_SET_DEF_FRAME)/(cmdCad)/1;
+  !!DL(TRAINER_CMD_DLG):A(item)/(DLG_CMD_SET_DEF_FRAME)/(cmdCad);
   !!VR(cmdCad):+1;
 !!en;
 
@@ -2276,8 +2276,8 @@ ZVSE2
 !!VR(typeNew:y):Si^mouse_item^-31;      [get type ID]
 
 !!if&(type)<>(typeNew);
-  !!DL(TRAINER_CMD_DLG):A13/(DLG_CMD_SET_DEF_FRAME)/(typeNew)/1; [set new commander in item 13]
-  !!DL(TRAINER_CMD_DLG):Ai^mouse_item^/(DLG_CMD_SET_DEF_FRAME)/9/1;
+  !!DL(TRAINER_CMD_DLG):A13/(DLG_CMD_SET_DEF_FRAME)/(typeNew); [set new commander in item 13]
+  !!DL(TRAINER_CMD_DLG):Ai^mouse_item^/(DLG_CMD_SET_DEF_FRAME)/9;
   !!CO(cmd):T(typeNew);
   !!FU(trainer_RefreshCommanders):P(typeNew);
   !!SN:P^trn_quest.wav^;
@@ -2345,11 +2345,11 @@ ZVSE2
 
   !!if&(art)<=0;
     ; Switch to transparent def if no artifact is equipped
-    !!DL(TRAINER_CMD_DLG):A(artCad)/(DLG_CMD_SET_DEF)/^trn_noArt.def^/1;
+    !!DL(TRAINER_CMD_DLG):A(artCad)/(DLG_CMD_SET_DEF)/^trn_noArt.def^;
   !!el;
     ; switch back to origianl def if any is equipped
-    !!DL(TRAINER_CMD_DLG):A(artCad)/(DLG_CMD_SET_DEF)/^artifact.def^/1;    
-    !!DL(TRAINER_CMD_DLG):A(artCad)/(DLG_CMD_SET_DEF_FRAME)/(art)/1;
+    !!DL(TRAINER_CMD_DLG):A(artCad)/(DLG_CMD_SET_DEF)/^artifact.def^;    
+    !!DL(TRAINER_CMD_DLG):A(artCad)/(DLG_CMD_SET_DEF_FRAME)/(art);
   !!en;
 
   !!VR(highlight):S(art) -66;
