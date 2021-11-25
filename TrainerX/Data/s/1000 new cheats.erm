@@ -7,6 +7,25 @@ ZVSE2
 ; Cheats activated by F3 and F6
 
 
+******************************
+**** Initialise variables ****
+******************************
+
+!?FU(OnAfterErmInstructions);
+; Set the choices for new cheats
+!!FU(trainer_GetFirstHumanPlayer):P?i^trainer_ownerChoice^;
+!!VRi^trainer_objChoice^:S0;            [Default option - the first option]
+
+!?FU(trainer_GetFirstHumanPlayer);
+!#VA(player:x);
+
+!!re i/(PLAYER_FIRST)/(PLAYER_LAST);
+  !!OW:Ii/?(isAi:y);
+
+  !!VR(player)&(isAi)<>(TRUE):Si;
+  !!br&(isAi)<>(TRUE);
+!!en;
+
 *****************************************************************
 **** Set Up the type of the object placed by Place Obastacle ****
 *****************************************************************

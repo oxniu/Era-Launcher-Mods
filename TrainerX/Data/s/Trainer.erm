@@ -1,30 +1,12 @@
 ZVSE2
-; Author:   Valery, renewed by Archer30
+; Author:   Archer30
+; Original Author: Valery
 ; Special thanks to Jim Vogan, Hawaiing, MoP, igrik and Algor
 ; Engine:   ERM 2.0+
 ; Requires: ERA 3.9+, Era Erm Framework
 
 ; Ultimate trainer for ERA
 
-
-!?FU(OnAfterErmInstructions);
-!!FU(trainer_CheckWoGScripts):P;
-!!FU(trainer_GetFirstHumanPlayer):P?(player:y);
-!!VRi^trainer_objChoice^:S0;            [Default option - the first option]
-!!VRi^trainer_ownerChoice^:S(player);
-
-!?FU(trainer_CheckWoGScripts);
-!!UN:P36/?i^mithril_on^;                [Check mithril enhancement]
-
-!?FU(trainer_GetFirstHumanPlayer);
-!#VA(player:x);
-
-!!re i/(PLAYER_FIRST)/(PLAYER_LAST);
-  !!OW:Ii/?(isAi:y);
-
-  !!VR(player)&(isAi)<>(TRUE):Si;
-  !!br&(isAi)<>(TRUE);
-!!en;
 
 !?FU(OnKeyPressed_AdvMap)&i^key^=(KEY_F2)/999;
 !#VA(key:x) (preventDefault:x) (isDown:x);
@@ -33,9 +15,6 @@ ZVSE2
 
 !!SN:P^Military.wav^;
 !!FU(trainer_SelectHeroMain):P;
-
-!?FU(OnCustomDialogEvent)&i^dlg_id^=(TRAINER_MAIN_DLG)/i^mouse_item^=99/i^mouse_action^=(MOUSE_RMB_PRESSED);
-!!SN:E5118576/3/i^trainer_hero^/1/1/1;  [display hero dialogue, 5th parameter for type of dialogue]
 
 !?FU(trainer_SelectHeroMain);
 !!VRi^trainer_hero^:S(NO_HERO);         [initialise hero ID]
@@ -121,7 +100,8 @@ ZVSE2
 !!HE(hero):O?i^trainer_player^;         [Set trainer player number]
 !!FU(trainer_GetPlayerStr):Pi^trainer_player^; [Set trainer player string]
 !!VRi^trainer_spellBookAsked^:S(FALSE); [Initialise the variable of asking whether the hero wants to have a spell book on learning spells]
-!!FU(trainer_GetPrimSkillCap):P;               [check if prima.dll is enabled]
+!!UN:P36/?i^mithril_on^;                [Check mithril enhancement]
+!!FU(trainer_GetPrimSkillCap):P;        [check if prima.dll is enabled]
 
 ; Set the pages of tables
 !!VRi^trainer_monTablePage^:S(TOWN_CASTLE);
@@ -370,7 +350,7 @@ ZVSE2
   !!en;
 !!en;
 
-!?FU(trainer_CheckZ1FirstCharIsNum);[Hawaiing]
+!?FU(trainer_CheckZ1FirstCharIsNum);    [by Hawaiing]
 !#VA(result:x);
 
 !!VR(result):S(FALSE);
@@ -380,6 +360,10 @@ ZVSE2
 *?FU(OnCustomDialogEvent)&i^dlg_id^=(TRAINER_MAIN_DLG); [set dialogue colour - disable for now]
 *!FU(trainer_SetDlgColour):P(TRAINER_MAIN_DLG)/i^trainer_player^; 
 *!SN:D;
+
+; Show Hero Screen
+!?FU(OnCustomDialogEvent)&i^dlg_id^=(TRAINER_MAIN_DLG)/i^mouse_item^=99/i^mouse_action^=(MOUSE_RMB_PRESSED);
+!!SN:E5118576/3/i^trainer_hero^/1/1/1;  [5th parameter - the type of dialogue]
 
 ; Show guide/info/help of Trainer
 !?FU(OnCustomDialogEvent)&i^dlg_id^=(TRAINER_MAIN_DLG)/i^mouse_item^=9/i^mouse_action^=(MOUSE_LMB_RELEASED);
@@ -503,6 +487,7 @@ ZVSE2
 !!VR(page:y):Si^trainer_spellTablePage^;
 !!VR(index:y):Si^mouse_item^ -196;
 !!VR(dialogueShown:y):S(FALSE);         [Variable for checking whether the dialogue of asking giving spell book is shown, use for sound event]
+!!VR(spellBookGiven:y):S(FALSE);        [Variable for determine which sound to be played]
 
 !!if&(page)=0;
   !!VR(spellArray:y):Si^trainer_airSpells^;
@@ -535,6 +520,7 @@ ZVSE2
 
       !!if&1;
         !!HE(hero):A4/(ART_SPELL_BOOK);
+        !!VR(spellBookGiven):S(TRUE);
         !!FU(trainer_RefreshArtTable)&i^trainer_artTablePage^=10:P10/(hero);
       !!en;
     !!en;
@@ -545,6 +531,7 @@ ZVSE2
 !!en;
 
 !!SN&(dialogueShown)=(FALSE):P^button.wav^;
+!!FU(trainer_PlayArtSound)&(spellBookGiven):P;
 
 ; Learn and forget all the spells
 !?FU(OnCustomDialogEvent)&i^dlg_id^=(TRAINER_MAIN_DLG)/i^mouse_item^>=109/i^mouse_item^<=110/i^mouse_action^=(MOUSE_LMB_RELEASED);
