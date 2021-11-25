@@ -141,68 +141,47 @@ ZVSE2
 !!IP:Di^battle_owner_1^ Wi^battle_hero_0^/117/119; [Pass henchman to the defender's PC]
 
 !?FU(OnSetupBattlefield)&i^hench_on^/i^battle_humanOnly^=(FALSE);
-!!FU(hench_SetupHenchStack):P;
+!!FU(hench_SetUpHenchStack):P(BATTLE_LEFT);
+!!FU(hench_SetUpHenchStack):P(BATTLE_RIGHT);
 
 !?FU(OnBattleRound)&i^battle_round^=0/i^hench_on^/i^battle_humanOnly^;
-!!FU(hench_SetupHenchStack):P;
+!!FU(hench_SetUpHenchStack):P(BATTLE_LEFT);
+!!FU(hench_SetUpHenchStack):P(BATTLE_RIGHT);
 
-!?FU(hench_SetupHenchStack);
-!!VRi^hench_stack_0^:S(NO_STACK);
-!!VRi^hench_stack_1^:S(NO_STACK);
-!!VRi^heroExpBefore_0^:S0;              [Get heros' exp before the battle in order to calculate how many exp was earned after battle]
-!!VRi^heroExpBefore_1^:S0;
+!?FU(hench_SetUpHenchStack);
+!#VA(side:x);
 
-!!VR(atkHero:y):Si^battle_hero_0^;
-!!OW:Ii^battle_owner_0^/?(isAi:y);
-!!FU(hench_ChooseAiHench)&(isAi):P(atkHero)/(BATTLE_LEFT);
-!!IF:W(atkHero);
+!!VRi^hench_stack_%(side)^:S(NO_STACK);
+!!VRi^heroExpBefore_%(side)^:S0;        [Get heros' exp before the battle in order to calculate how many exp was earned after battle]
 
-; Place the henchman stack for the attacker
-!!if&w118>(NO_MON)/w119;
-  !!FU(hench_GetHenchPos):P(BATTLE_LEFT)/w118/?(henchPos:y);
-  !!BU:Sw118/1/(henchPos)/(BATTLE_LEFT)/-1/(FALSE); [Place]
-  !!BU:E(henchPos)/?i^hench_stack_0^;[Store stack id]
+!!VR(hero:y):Si^battle_hero_%(side)^;
 
-  !!if&i^hench_stack_0^>(NO_STACK);     [Enhanced]
-    !!FU(hench_ManageHenchStats):Pi^hench_stack_0^/0/(atkHero); [Manage stats]
-    !!FU(hench_StackExpBF)&i^hench_stackExpEnabled^:Pi^hench_stack_0^/(BATTLE_LEFT)/(atkHero); [Set up attacker's henchman stack exp]
-
-    !!HE(atkHero):E?i^heroExpBefore_0^/?(atkHeroLv:y); 
-
-    !!if&i^hench_knowledgeForSpell^;
-      !!FU(hench_ManageExtraSpells):P(BATTLE_LEFT)/i^hench_stack_0^;
-    !!en;
-  !!en;
-!!en;
-
-!!BH(BATTLE_RIGHT):N?(defHero:y);       [Random Heroes compatible]
-
-!!if&(defHero)>(NO_HERO);
-  !!HE(defHero):O?(owner:y);
+!!if&(hero)>(NO_HERO);
+  !!HE(hero):O?(owner:y);
   !!OW:I(owner)/?(isAi:y);
-  !!FU(hench_ChooseAiHench)&(isAi):P(defHero)/(BATTLE_RIGHT);
-  !!IF:W(defHero);
+  !!FU(hench_ChooseAiHench)|(owner)=(NO_PLAYER)/(isAi):P(hero)/(side); [owner = no player with Random Hero optino]
+  !!IF:W(hero);
 
-  ; Place the henchman stack for the defender
+  ; Place the henchman stack
   !!if&w118>(NO_MON)/w119;
-    !!FU(hench_GetHenchPos):P(BATTLE_RIGHT)/w118/?(henchPos:y);
-    !!BU:Sw118/1/(henchPos)/(BATTLE_RIGHT)/-1/(FALSE); [Place]
-    !!BU:E(henchPos)/?i^hench_stack_1^; [Store stack id]
+    !!FU(hench_GetHenchPosition):P(side)/w118/?(henchPos:y);
+    !!BU:Sw118/1/(henchPos)/(side)/-1/(FALSE); [Place]
+    !!BU:E(henchPos)/?i^hench_stack_%(side)^; [Store stack id]
 
-    !!if&i^hench_stack_1^>(NO_STACK);   [Enhanced]
-      !!FU(hench_ManageHenchStats):Pi^hench_stack_1^/1/(defHero); [Manage stats]
-      !!FU(hench_StackExpBF)&i^hench_stackExpEnabled^:Pi^hench_stack_1^/(BATTLE_LEFT)/(defHero); [Set up defender's henchman stack exp]
+    !!if&i^hench_stack_%(side)^>(NO_STACK);   [Enhanced]
+      !!FU(hench_ManageHenchStats):Pi^hench_stack_%(side)^/(side)/(hero); [Manage stats]
+      !!FU(hench_StackExpBF)&i^hench_stackExpEnabled^:Pi^hench_stack_%(side)^/(side)/(hero); [Set up defender's henchman stack exp]
 
-      !!HE(defHero):E?i^heroExpBefore_1^/?(defHeroLv:y); 
+      !!HE(hero):E?i^heroExpBefore_%(side)^/?(heroLv:y); 
 
       !!if&i^hench_knowledgeForSpell^;
-        !!FU(hench_ManageExtraSpells):P(BATTLE_RIGHT)/i^hench_stack_1^;
+        !!FU(hench_ManageExtraSpells):P(side)/i^hench_stack_%(side)^;
       !!en;
     !!en;
   !!en;
 !!en;
 
-!?FU(hench_GetHenchPos);
+!?FU(hench_GetHenchPosition);
 !#VA(side:x) (mon:x) (position:x);
 
 !!if&(side)=(BATTLE_LEFT);
@@ -230,7 +209,7 @@ ZVSE2
 ; Manage more santa guards - must be executed after tactic phase!
 !?FU(OnBattleRound)&i^battle_round^=0/i^hench_on^/i^hench_moreSantaGuards^;
 !!FU(hench_ManageSantaGuards):P(BATTLE_LEFT)/i^hench_stack_0^;
-!!FU(hench_ManageSantaGuards)&i^battle_hero_1^>(NO_HERO):P(BATTLE_LEFT)/i^hench_stack_0^/w118;
+!!FU(hench_ManageSantaGuards)&i^battle_hero_1^>(NO_HERO):P(BATTLE_RIGHT)/i^hench_stack_0^/w118;
 
 ; Fix exessive henchman quantity/Manage Dead or Alive
 !?FU(OnAfterBattleAction)&i^hench_on^;
@@ -239,12 +218,10 @@ ZVSE2
 
   !!if&(qty)<=0;
     !!BMi^hench_stack_0^:K100000000;    [prevent resurrecting henchman in battle]
-    !!FU(hench_ManageHenchLiving):P(BATTLE_RIGHT)/(FALSE);
-  !!en;
-
-  !!if&(mon)<>(MON_GHOST)/(qty)>1;
+    !!FU(hench_ManageHenchLiving):P(BATTLE_LEFT)/(FALSE);
+  !!el&(qty)>1/(mon)<>(MON_GHOST);
     !!BMi^hench_stack_0^:N1 L0;
-    !!FU(hench_ManageHenchLiving):P(BATTLE_RIGHT)/(TRUE);
+    !!FU(hench_ManageHenchLiving):P(BATTLE_LEFT)/(TRUE);
     !!SN:D;
   !!en;
 !!en;
@@ -254,12 +231,10 @@ ZVSE2
 
   !!if&(qty)<=0;
     !!BMi^hench_stack_1^:K100000000;    [prevent resurrecting henchman in battle]
-    !!FU(hench_ManageHenchLiving):P(BATTLE_LEFT)/(FALSE);
-  !!en;
-
-  !!if&(mon)<>(MON_GHOST)/(qty)>1;
+    !!FU(hench_ManageHenchLiving):P(BATTLE_RIGHT)/(FALSE);
+  !!el&(qty)>1/(mon)<>(MON_GHOST);
     !!BMi^hench_stack_1^:N1 L0;
-    !!FU(hench_ManageHenchLiving):P(BATTLE_LEFT)/(TRUE);
+    !!FU(hench_ManageHenchLiving):P(BATTLE_RIGHT)/(TRUE);
     !!SN:D;
   !!en;
 !!en;
@@ -833,14 +808,18 @@ ZVSE2
 !!VR(result):S(FALSE);
 !!SN:L^amethyst2_4.dll^/?(amethyst:y);
 
+!!if&(amethyst)=0;
+  !!VR(result)&(mon)=(MON_SANTA_GREMLIN):S(TRUE);
+!!en;
+
 !!if&(amethyst)<>0;
   !!SN:A(amethyst)/^_hasSantaGuards^/?(func:y);
 
-  !!if&(amethyst)<>0/(func)<>0;
+  !!if&(func)<>0;
     !!SN:E(func)/(mon);
     !!VR(result):Sv1;
   !!el;
-    !!VR(result)&(mon)=(MON_SANTA_GREMLIN):S1;
+    !!VR(result)&(mon)=(MON_SANTA_GREMLIN):S(TRUE);
   !!en;
 !!en;
 
