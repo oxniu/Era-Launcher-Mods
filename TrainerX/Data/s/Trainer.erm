@@ -505,52 +505,55 @@ ZVSE2
   !!VR(spellArray):Si^trainer_earthSpells^;
 !!en;
 
-; Ctrl Click - Give Spell book/Learn spells of current page
-!!if&i^key_ctrl^/i^key_shift^=(FALSE)/i^key_alt^=(FALSE);
-  !!HE(hero)&(bookOwned)<=0:A4/(ART_SPELL_BOOK);
+!!SN:M(spellArray)/(index)/?(spell:y);
 
-  !!re (indexLoop:y)/0/17;
-    !!co&(page)=0/(indexLoop)=17;       [Skip Titan's Lightning Bolt]
+!!if&(spell)<>(SPELL_TITANS_LIGHTNING_BOLT); [If not Titan's Thunder Bolt]
+  ; Ctrl Click - Give Spell book/Learn spells of current page
+  !!if&i^key_ctrl^/i^key_shift^=(FALSE)/i^key_alt^=(FALSE);
+    !!HE(hero)&(bookOwned)<=0:A4/(ART_SPELL_BOOK);
 
-    !!SN:M(spellArray)/(indexLoop)/?(spell:y);
-    !!HE(hero):M=(spell)/1;
+    !!re (indexLoop:y)/0/17;
+      !!co&(page)=0/(indexLoop)=17;       [Skip Titan's Lightning Bolt]
 
-    !!if&-1;
-      !!HE(hero):M(spell)/(TRUE);
-      !!VR(spellUpdated):S(TRUE);
+      !!SN:M(spellArray)/(indexLoop)/?(spell:y);
+      !!HE(hero):M=(spell)/1;
+
+      !!if&-1;
+        !!HE(hero):M(spell)/(TRUE);
+        !!VR(spellUpdated):S(TRUE);
+      !!en;
     !!en;
-  !!en;
-; Shift Click - Remove all spells
-!!el&i^key_ctrl^=(FALSE)/i^key_shift^/i^key_alt^=(FALSE);
-  !!re i/(SPELL_FIRST)/(SPELL_LAST_WOG);
-    !!HE(hero):M=i/1;
+  ; Shift Click - Remove all spells
+  !!el&i^key_ctrl^=(FALSE)/i^key_shift^/i^key_alt^=(FALSE);
+    !!re i/(SPELL_FIRST)/(SPELL_LAST_WOG);
+      !!HE(hero):M=i/1;
 
-    !!if&1;
-      !!HE(hero):Mi/(FALSE);
-      !!VR(spellUpdated):S(TRUE);
+      !!if&1;
+        !!HE(hero):Mi/(FALSE);
+        !!VR(spellUpdated):S(TRUE);
+      !!en;
     !!en;
-  !!en;
 
-  !!FU(trainer_UpdateSpellBook):P(hero); [unequip and equip back all the artifacts to make spells from arts reappear in the book]
-; Alt Click - Give spell book/Learn all spells
-!!el&i^key_ctrl^=(FALSE)/i^key_shift^=(FALSE)/i^key_alt^;
-  !!HE(hero)&(bookOwned)<=0:A4/(ART_SPELL_BOOK);
+    !!FU(trainer_UpdateSpellBook):P(hero); [unequip and equip back all the artifacts to make spells from arts reappear in the book]
+  ; Alt Click - Give spell book/Learn all spells
+  !!el&i^key_ctrl^=(FALSE)/i^key_shift^=(FALSE)/i^key_alt^;
+    !!HE(hero)&(bookOwned)<=0:A4/(ART_SPELL_BOOK);
 
-  !!re i/(SPELL_FIRST)/(SPELL_LAST_WOG);
-    !!co&i=(SPELL_TITANS_LIGHTNING_BOLT);
-    
-    !!HE(hero):M=i/1;
+    !!re i/(SPELL_FIRST)/(SPELL_LAST_WOG);
+      !!co&i=(SPELL_TITANS_LIGHTNING_BOLT);
+      
+      !!HE(hero):M=i/1;
 
-    !!if&-1;
-      !!HE(hero):Mi/(TRUE);
-      !!VR(spellUpdated):S(TRUE);
+      !!if&-1;
+        !!HE(hero):Mi/(TRUE);
+        !!VR(spellUpdated):S(TRUE);
+      !!en;
     !!en;
   !!en;
 ; Normal Click - Forget the selected spell if learned, otherwise learn it
 !!el;
   !!VR(spellUpdated):S(TRUE);
 
-  !!SN:M(spellArray)/(index)/?(spell);
   !!HE(hero):M=(spell)/1;
 
   !!if&1;

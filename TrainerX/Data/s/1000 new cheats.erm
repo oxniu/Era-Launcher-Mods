@@ -581,7 +581,7 @@ The game may fall at any time.^;
 !!FU(trainer_ConvertStrToInts):Pz1/?(arrayId:y)/?(amountOfElems:y);
 !!FU(trainer_ApplyArrayToDate):P(arrayId);
 
-!?FU(trainer_ConvertStrToInts);         [daemon_n]
+!?FU(trainer_ConvertStrToInts);         [by daemon_n]
 !#VA(strPtr:x);                         [Original string.]
 !#VA(numbersarrayId:x);                 [returns local array id via ?(intVar:y)]
 !#VA(amountOfNumbers:x);                [returns local array id size ]
