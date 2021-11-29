@@ -32,6 +32,8 @@ ZVSE2
 ; ============ END PUBLIC ============
 
 
+!#VRi^enhanced_henchman_on^:S(TRUE);
+
 !?FU(hench_LoadGlobalConfig);
 !!FU(LoadIntGlobalsFromJson):P^henchmen.settings_%i(hench_lang).^/^hench_^/
   ^battleExpStatic^/^battleExpRandom^/^battleHeroExpCoef^/^battleExpPerHeroLv^/^battleExpMin^/^battleExpMax^/
@@ -68,17 +70,17 @@ ZVSE2
 !!UN:J8/5/^Archer - info.erm^;
 !!VRi^hench_lang^&1:S2;
 
-!#UN:P49/?i^hench_on^;
+!#UN:P49/?i^hench_enabled^;
 !#FU(hench_CheckGameLang):P;
 !#FU(hench_LoadGlobalConfig):P;         [Load config for banner initialization]
 
-!?FU(OnTransferHero)&i^hench_on^/i^hench_campaignTransfer^;
+!?FU(OnTransferHero)&i^hench_enabled^/i^hench_campaignTransfer^;
 !#VA(hero:x);
 
 !!VRi^hench_transferred_%(hero)^:S(TRUE); [Mark for henchman initialization]
 
 ; Initialise variables
-!?FU(OnAfterErmInstructions)&i^hench_on^;
+!?FU(OnAfterErmInstructions)&i^hench_enabled^;
 !!re i/(HERO_FIRST)/(HERO_LAST_WOG);
   !!VRi^hench_banner_%i^:S-1;           [Enhanced - Set Warlord's Banner to none]
   !!co&i^hench_transferred_%i^;         [Skip initialization if the henchman is from the previous scenario]
@@ -88,12 +90,12 @@ ZVSE2
   !!VRw118:S(NO_MON);
 !!en;
 
-!?FU(OnEveryDay)&i^hench_on^;
+!?FU(OnEveryDay)&i^hench_enabled^;
 !!FU(hench_CheckGameLang)&i^timerIsHuman^:P;
 !!FU(hench_LoadGlobalConfig)&i^timerOnce^/i^timerDay^>1:P;
 
 ; Pops up dialogue when clicking on player's flag on the hero screen
-!?FU(OnHeroScreenMouseClick)&i^mouse_item^=141/i^hench_on^;
+!?FU(OnHeroScreenMouseClick)&i^mouse_item^=141/i^hench_enabled^;
 !!CM:H?(hero:y)/?(secHero:y);
 
 !!if&i^mouse_action^=(MOUSE_LMB_PRESSED)/i^key_ctrl^=(FALSE);
@@ -122,7 +124,7 @@ ZVSE2
 !!en;
 
 ; Resurrect the henchamn when visting a town
-!?OB(OBJ_TOWN)&i^hench_on^;
+!?OB(OBJ_TOWN)&i^hench_enabled^;
 !!OW:I(CURRENT_PLAYER)/?(isAi:y);
 !!FU&(isAi):E;                          [exit if the visitng player is AI]
 
@@ -131,20 +133,20 @@ ZVSE2
 !!FU(hench_ResurrectHench)&w118>(NO_MON)/w119<>(TRUE):P(hero); [Offer to resurrect the henchman if henchman is avaliable and dead]
 
 ; Ask to get a henchman for human player or give one for AI player
-!?FU(OnBeforeBattleUniversal)&i^hench_on^;
+!?FU(OnBeforeBattleUniversal)&i^hench_enabled^;
 !!FU(hench_GetHenchBeforeBattle):P(BATTLE_LEFT);
 !!FU(hench_GetHenchBeforeBattle):P(BATTLE_RIGHT);
 
 ; Set up henchmen on the battlefield
 ; Note: timing is different in PVP battle!
-!?FU(OnBeforeBattlefieldVisible)&i^hench_on^/i^battle_humanOnly^;
+!?FU(OnBeforeBattlefieldVisible)&i^hench_enabled^/i^battle_humanOnly^;
 !!IP:Di^battle_owner_1^ Wi^battle_hero_0^/117/119; [Pass henchman to the defender's PC]
 
-!?FU(OnSetupBattlefield)&i^hench_on^/i^battle_humanOnly^=(FALSE);
+!?FU(OnSetupBattlefield)&i^hench_enabled^/i^battle_humanOnly^=(FALSE);
 !!FU(hench_SetUpHenchStack):P(BATTLE_LEFT);
 !!FU(hench_SetUpHenchStack):P(BATTLE_RIGHT);
 
-!?FU(OnBattleRound)&i^battle_round^=0/i^hench_on^/i^battle_humanOnly^;
+!?FU(OnBattleRound)&i^battle_round^=0/i^hench_enabled^/i^battle_humanOnly^;
 !!FU(hench_SetUpHenchStack):P(BATTLE_LEFT);
 !!FU(hench_SetUpHenchStack):P(BATTLE_RIGHT);
 
@@ -207,12 +209,12 @@ ZVSE2
 !!en;
 
 ; Manage more santa guards - must be executed after tactic phase!
-!?FU(OnBattleRound)&i^battle_round^=0/i^hench_on^/i^hench_moreSantaGuards^;
+!?FU(OnBattleRound)&i^battle_round^=0/i^hench_enabled^/i^hench_moreSantaGuards^;
 !!FU(hench_ManageSantaGuards):P(BATTLE_LEFT)/i^hench_stack_0^;
 !!FU(hench_ManageSantaGuards)&i^battle_hero_1^>(NO_HERO):P(BATTLE_RIGHT)/i^hench_stack_0^/w118;
 
 ; Fix exessive henchman quantity/Manage Dead or Alive
-!?FU(OnAfterBattleAction)&i^hench_on^;
+!?FU(OnAfterBattleAction)&i^hench_enabled^;
 !!if&i^hench_stack_0^>(NO_STACK);       [i^hench_stack_0^ - id of attacking henchman stack]
   !!BMi^hench_stack_0^:N?(qty:y) T?(mon:y);
 
@@ -239,7 +241,7 @@ ZVSE2
   !!en;
 !!en;
 
-!?FU(OnMagicCorrectedResistance)&i^hench_on^/i^hench_spellDmgPerPower^>0;
+!?FU(OnMagicCorrectedResistance)&i^hench_enabled^/i^hench_spellDmgPerPower^>0;
 !!BG:N?(stack:y) A?(action:y);
 !!FU&(stack)<>i^hench_stack_0^/(stack)<>i^hench_stack_1^:E;   [exit if not henchman]
 !!FU&(action)<>(BATTLE_ACTION_MONSTER_CAST):E; [exit if not monster casting]
@@ -560,7 +562,7 @@ ZVSE2
 !!VRw119:S(TRUE);
 
 ; Restore the henchman in battle replay
-!?FU(OnBeforeBattleUniversal)&i^hench_on^;
+!?FU(OnBeforeBattleUniversal)&i^hench_enabled^;
 !!SN:W^henchmen_side_0^/(FALSE)  W^henchmen_side_1^/(FALSE);
 !!BA:H0/?(atkHero:y) H1/?(defHero:y);
 
@@ -574,7 +576,7 @@ ZVSE2
   !!SN:W^henchmen_side_1^/w119;
 !!en;
 
-!?FU(OnBattleReplay)&i^hench_on^;
+!?FU(OnBattleReplay)&i^hench_enabled^;
 !!BA:H0/?(atkHero:y) H1/?(defHero:y);
 
 !!if&(atkHero)>(NO_HERO);
@@ -588,7 +590,7 @@ ZVSE2
 !!en;
 
 ; Reward the henchman exp if won the battle
-!?FU(OnAfterBattleUniversal)&i^hench_on^;[Enhanced]
+!?FU(OnAfterBattleUniversal)&i^hench_enabled^;[Enhanced]
 !!BA:H0/?(atkHero:y) H1/?(defHero:y);
 !!FU(hench_GiveExpAfterBattle)&(atkHero)>(NO_HERO):P(atkHero)/(BATTLE_LEFT);
 !!FU(hench_GiveExpAfterBattle)&(defHero)>(NO_HERO):P(defHero)/(BATTLE_RIGHT);
